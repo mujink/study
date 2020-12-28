@@ -8,6 +8,8 @@ y = np.array([1,2,3])
 
 #2. 모델 구성 (순차모델 레이어 구성)
 from tensorflow.keras.models import Sequential
+#. DENSE => DNN MODEL
+#. xNN 뉴럴 네크워크 (CNN,ANN,VNN,RNN... etc)
 from tensorflow.keras.layers import Dense
 
 model = Sequential()
