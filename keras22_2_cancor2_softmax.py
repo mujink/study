@@ -12,8 +12,7 @@ x = datasets.data
 y = datasets.target
 print(x.shape)      #(569,30)
 print(y.shape)      #(569,)
-print(x[:5])
-print(y)
+
 
 print(datasets.target_names)
 print(datasets.feature_names)
@@ -117,71 +116,73 @@ y = y.reshape(-1,1)                 #. y_train => 2D
 one.fit(y)                                #. Set
 y = one.transform(y).toarray()      #. transform
 
+
 #   tensorflow.keras.utils.OneHotEncodig
-# from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.utils import to_categorical
 # y = to_categorical(y) 
 # print(y[-5:-1])
 
-# x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.8, shuffle = True, random_state=1)
-# x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, train_size = 0.8, shuffle = True, random_state=1)
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.8, shuffle = True, random_state=1)
+x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, train_size = 0.8, shuffle = True, random_state=1)
 
-# scaler = MinMaxScaler()
-# scaler.fit(x_train)
-# x_train = scaler.transform(x_train)     
-# x_test = scaler.transform(x_test)
-# x_val = scaler.transform(x_val)
+scaler = MinMaxScaler()
+scaler.fit(x_train)
+x_train = scaler.transform(x_train)     
+x_test = scaler.transform(x_test)
+x_val = scaler.transform(x_val)
 
-# #2.model
-# from tensorflow.keras.models import Sequential , Model
-# from tensorflow.keras.layers import Dense, Input
+#2.model
+from tensorflow.keras.models import Sequential , Model
+from tensorflow.keras.layers import Dense, Input
 
-# # model = Sequential()
-# # model.add(Dense(100,activation="relu", input_shape=(30,)))
-# # model.add(Dense(20,activation="relu"))
-# # model.add(Dense(20,activation="relu"))
-# # model.add(Dense(20,activation="relu"))
-# # model.add(Dense(20,activation="relu"))
-# # model.add(Dense(20,activation="relu"))
-# # model.add(Dense(100,activation="relu"))
-# # model.add(Dense(1, activation="sigmoid"))
+model = Sequential()
+model.add(Dense(100,activation="relu", input_shape=(30,)))
+model.add(Dense(20,activation="relu"))
+model.add(Dense(20,activation="relu"))
+model.add(Dense(20,activation="relu"))
+model.add(Dense(20,activation="relu"))
+model.add(Dense(20,activation="relu"))
+model.add(Dense(100,activation="relu"))
+model.add(Dense(1, activation="sigmoid"))
 
-# input1 = Input(shape=(30,))
-# d1 = Dense(1000, activation='sigmoid')(input1)
-# dh = Dense(50, activation='sigmoid')(d1)
-# dh = Dense(20, activation='sigmoid')(d1)
-# dh = Dense(30, activation='sigmoid')(d1)
-# dh = Dense(30, activation='sigmoid')(dh)
-# outputs = Dense(2, activation='softmax')(dh)
+input1 = Input(shape=(30,))
+d1 = Dense(1000, activation='sigmoid')(input1)
+dh = Dense(50, activation='sigmoid')(d1)
+dh = Dense(20, activation='sigmoid')(d1)
+dh = Dense(30, activation='sigmoid')(d1)
+dh = Dense(30, activation='sigmoid')(dh)
+outputs = Dense(2, activation='sigmoid')(dh)
 
-# model = Model(inputs =  input1, outputs = outputs)
-# model.summary()
+model = Model(inputs =  input1, outputs = outputs)
+model.summary()
 
-# #3. Compile, train / binary_corssentropy
-# from tensorflow.keras.callbacks import EarlyStopping
-#                 # mean_squared_error
-# early_stopping = EarlyStopping(monitor='loss', patience=30, mode='min') 
-# model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-# model.fit(x_train, y_train, epochs=1000, validation_data=(x_val, y_val), batch_size=3, verbose=1, callbacks=[early_stopping])
+#3. Compile, train / binary_corssentropy
+from tensorflow.keras.callbacks import EarlyStopping
+                # mean_squared_error
+early_stopping = EarlyStopping(monitor='accuracy', patience=30, mode='max') 
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-# #4. Evaluate, predict
-# loss, acc = model.evaluate(x_test,y_test, batch_size=3)
-# print("loss : ", loss)
-# print("acc : ", acc)
+model.fit(x_train, y_train, epochs=1000, validation_data=(x_val, y_val), batch_size=3, verbose=1, callbacks=[early_stopping])
 
-# y_pred = np.array(model.predict(x_train[-5:-1]))
-# print(y_pred)
-# print(y_pred.argmax(axis=1))
-# print(y_train[-5:-1])
-# """
-#     loss :  0.47400525212287903
-#     acc :  0.8245614171028137
+#4. Evaluate, predict
+loss, acc = model.evaluate(x_test,y_test, batch_size=3)
+print("loss : ", loss)
+print("acc : ", acc)
 
-#     loss :  0.32467013597488403
-#     acc :  0.9736841917037964
+y_pred = np.array(model.predict(x_train[-5:-1]))
+print(y_pred)
+print(y_pred.argmax(axis=1))
+print(y_train[-5:-1])
+"""
+    loss :  0.47400525212287903
+    acc :  0.8245614171028137
 
-#     loss :  0.01316804252564907
-#     acc :  0.9912280440330505
+    loss :  0.32467013597488403
+    acc :  0.9736841917037964
 
-#     loss :  0.0458456426858902
-#     acc :  0.9912280440330505
-# """
+    loss :  0.01316804252564907
+    acc :  0.9912280440330505
+
+    loss :  0.0458456426858902
+    acc :  0.9912280440330505
+"""

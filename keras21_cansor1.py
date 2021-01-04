@@ -153,7 +153,7 @@ model.summary()
 #3. Compile, train / binary_corssentropy
 from tensorflow.keras.callbacks import EarlyStopping
                 # mean_squared_error
-early_stopping = EarlyStopping(monitor='loss', patience=30, mode='min') 
+early_stopping = EarlyStopping(monitor='accuracy', patience=30, mode='max') 
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 model.fit(x_train, y_train, epochs=1000, validation_data=(x_val, y_val), batch_size=3, verbose=1, callbacks=[early_stopping])
 
