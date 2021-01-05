@@ -20,8 +20,27 @@ y= np.array([4,5,6,7,8,9,10,11,12,13,50,60,70])
 print("x.shape : ", x.shape)  #(13,3)
 print("y.shape : ", y.shape)  #(13,)
 
+
+
+#1.1
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+
+# MinMaxScaler @@@@@@@@@@@@ 필수 @@@@@@@@@@@@
+
+scaler = MinMaxScaler()
+scaler.fit(x)
+x_train = scaler.transform(x)
+
 # x = x.reshape(13,3,1)
 # print("x.shape : ", x.shape)  #(13,3,1)
+
+# shuffle = 랜덤으로 섞음 , random_state (랜덤 난수 표 인덱스) @@@@@@@@@@@@ 필수 @@@@@@@@@@@@
+x_train, x_test, y_train, y_test = train_test_split(
+    x, y,train_size = 0.8, test_size=0.2, shuffle=True, random_state=66 )
+x_train, x_val, y_train, y_val = train_test_split(
+    x_train, x_train,train_size = 0.8, test_size=0.2, shuffle=True, random_state=66 )
+
 
 #2. model config
 from tensorflow.keras.models import Sequential
@@ -44,17 +63,24 @@ model.summary()
 
 model.compile(loss='mse', optimizer='adam')
 # model.fit(x, y, epochs=500, batch_size=1, verbose=1, callbacks=[early_stopping])
-model.fit(x, y, epochs=500, batch_size=1, verbose=1)
+model.fit(x_train, y_train, epochs=500, batch_size=1, verbose=1, validation_data=(x_val, y_val))
 
 #4. Evaluate, Predict
 loss = model.evaluate(x,y)
 print("loss : ", loss)
 
-x_pred = np.array([[50,60,70]])
+# x_pred = np.array([[50,60,70]])
 # x_pred = x_pred.reshape(1,3,1)
 
-y_Pred = model.predict(x_pred)
-print("y_pred : " , y_Pred)
+y_Pred = model.predict(x_test)
+# print("y_pred : " , y_Pred)
+
+
+from sklearn.metrics import r2_score
+r2_m1 = r2_score(y_test, y_Pred)
+
+print("R2 :", r2_m1 )
+
 """
  80+1(????)
 
@@ -123,4 +149,10 @@ y_pred :  [[80.00001]]
 
 loss :  4.122459665301115e-11
 y_pred :  [[80.00002]]
+
+
+MinMaxScaler
+train_test_split
+loss :  1.0172398106078617e-05
+y_pred :  [[79.990204]]
 """

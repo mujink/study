@@ -13,8 +13,30 @@ y= np.array([4,5,6,7,8,9,10,11,12,13,50,60,70])
 print("x.shape : ", x.shape)  #(13,3)
 print("y.shape : ", y.shape)  #(13,)
 
-x = x.reshape(13,3,1)
 # print("x.shape : ", x.shape)  #(13,3,1)
+
+
+
+#1.1
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+
+# MinMaxScaler @@@@@@@@@@@@ 필수 @@@@@@@@@@@@
+
+scaler = MinMaxScaler()
+scaler.fit(x)
+x_train = scaler.transform(x)
+
+x = x.reshape(13,3,1)
+
+# x = x.reshape(13,3,1)
+# print("x.shape : ", x.shape)  #(13,3,1)
+
+# shuffle = 랜덤으로 섞음 , random_state (랜덤 난수 표 인덱스) @@@@@@@@@@@@ 필수 @@@@@@@@@@@@
+x_train, x_test, y_train, y_test = train_test_split(
+    x, y,train_size = 0.8, test_size=0.2, shuffle=True, random_state=66 )
+x_train, x_val, y_train, y_val = train_test_split(
+    x_train, x_train,train_size = 0.8, test_size=0.2, shuffle=True, random_state=66 )
 
 
 #2. model config
@@ -42,11 +64,18 @@ model.fit(x, y, epochs=1000, batch_size=1, verbose=1)
 loss = model.evaluate(x,y)
 print("loss : ", loss)
 
-x_pred = np.array([50,60,70])
-x_pred = x_pred.reshape(1,3,1)
 
-y_pred = model.predict(x_pred)
-print(y_pred)
+y_Pred = model.predict(x_test)
+print(x_test.shape) # (3,3,1)
+
+# 
+from sklearn.metrics import r2_score
+r2_m1 = r2_score(y_test, y_Pred)
+print("y_pred : " , y_Pred)
+
+print("R2 :", r2_m1 )
+# print("y_pred : " , y_Pred)
+
 
 
 """
@@ -101,4 +130,11 @@ loss :  0.0871659442782402
 
 loss :  0.024140801280736923
 [[81.300766]]
+
+
+loss :  0.013255717232823372
+y_pred :  [[10.001777]
+ [ 5.035692]
+ [59.70413 ]]
+R2 : 0.9999519907166478
 """
