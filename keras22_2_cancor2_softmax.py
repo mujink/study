@@ -12,7 +12,8 @@ x = datasets.data
 y = datasets.target
 print(x.shape)      #(569,30)
 print(y.shape)      #(569,)
-
+print(x[:5])
+print(y)
 
 print(datasets.target_names)
 print(datasets.feature_names)
@@ -116,9 +117,8 @@ y = y.reshape(-1,1)                 #. y_train => 2D
 one.fit(y)                                #. Set
 y = one.transform(y).toarray()      #. transform
 
-
 #   tensorflow.keras.utils.OneHotEncodig
-from tensorflow.keras.utils import to_categorical
+# from tensorflow.keras.utils import to_categorical
 # y = to_categorical(y) 
 # print(y[-5:-1])
 
@@ -135,15 +135,15 @@ x_val = scaler.transform(x_val)
 from tensorflow.keras.models import Sequential , Model
 from tensorflow.keras.layers import Dense, Input
 
-model = Sequential()
-model.add(Dense(100,activation="relu", input_shape=(30,)))
-model.add(Dense(20,activation="relu"))
-model.add(Dense(20,activation="relu"))
-model.add(Dense(20,activation="relu"))
-model.add(Dense(20,activation="relu"))
-model.add(Dense(20,activation="relu"))
-model.add(Dense(100,activation="relu"))
-model.add(Dense(1, activation="sigmoid"))
+# model = Sequential()
+# model.add(Dense(100,activation="relu", input_shape=(30,)))
+# model.add(Dense(20,activation="relu"))
+# model.add(Dense(20,activation="relu"))
+# model.add(Dense(20,activation="relu"))
+# model.add(Dense(20,activation="relu"))
+# model.add(Dense(20,activation="relu"))
+# model.add(Dense(100,activation="relu"))
+# model.add(Dense(1, activation="sigmoid"))
 
 input1 = Input(shape=(30,))
 d1 = Dense(1000, activation='sigmoid')(input1)
@@ -151,7 +151,7 @@ dh = Dense(50, activation='sigmoid')(d1)
 dh = Dense(20, activation='sigmoid')(d1)
 dh = Dense(30, activation='sigmoid')(d1)
 dh = Dense(30, activation='sigmoid')(dh)
-outputs = Dense(2, activation='sigmoid')(dh)
+outputs = Dense(2, activation='softmax')(dh)
 
 model = Model(inputs =  input1, outputs = outputs)
 model.summary()
@@ -159,9 +159,8 @@ model.summary()
 #3. Compile, train / binary_corssentropy
 from tensorflow.keras.callbacks import EarlyStopping
                 # mean_squared_error
-early_stopping = EarlyStopping(monitor='accuracy', patience=30, mode='max') 
+early_stopping = EarlyStopping(monitor='loss', patience=30, mode='min') 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-
 model.fit(x_train, y_train, epochs=1000, validation_data=(x_val, y_val), batch_size=3, verbose=1, callbacks=[early_stopping])
 
 #4. Evaluate, predict
