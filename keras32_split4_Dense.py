@@ -15,6 +15,8 @@
 #  예상 Predict는 (101, 102, 103, 104, 105)
 
 # LSTM 과 결과 비교!!
+
+
 # Dense 모델 구성하시오.
 import numpy as np
 b = np.array(range(96,106))
@@ -51,12 +53,14 @@ x_train, x_val, y_train, y_val = train_test_split(
 
 # MinMaxScaler @@@@@@@@@@@@ 필수 @@@@@@@@@@@@
 
+
 scaler = MinMaxScaler()
+
 scaler.fit(x_train)
 x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
 x_val = scaler.transform(x_val)
-x_pred = scaler.transform(x_pred)
+x_predict = scaler.transform(x_pred)
 
 print(x_train.shape)
 print(x_test.shape)
@@ -100,11 +104,38 @@ print("y_pred[4] : " , y_Predict[4])
 print("x_pred[3] : " , x_pred[3])
 print("y_pred[3] : " , y_Predict[3])
 
+
 from sklearn.metrics import r2_score
 r2_m1 = r2_score(y_pred, y_Predict)
 print("R2 :", r2_m1 )
 
+##???
 """
+X_std = (X - X.min(axis=0)) / (X.max(axis=0) - X.min(axis=0))
+X_scaled = X_std * (max - min) + min
+===================================
+        column1     Min  Max        (X.max(axis=0) - X.min(axis=0)
+x_train    1         1    95    =>    94
+x_train    2         2    96    =>    94
+x_train    3         3    97    =>    94
+x_train    4         4    98    =>    94
+x_train    5         5    99    =>    94
+===================================
+===================================
+ x_pred :                           (X - X.min(axis=0))
+ [ 96  97  98  99 100]              [95  95  95  95  95]
+ [ 97  98  99 100 101]              [96  96  96  96  96]
+ [ 98  99 100 101 102]              [97  97  97  97  97]
+ [ 99 100 101 102 103]              [98  98  98  98  98]
+ [100 101 102 103 104]              [99  99  99  99  99]
+===================================
+ x_predict :  
+[[1.0106383  1.0106383  1.0106383  1.0106383  1.0106383 ]
+ [1.0212766  1.0212766  1.0212766  1.0212766  1.0212766 ]
+ [1.03191489 1.03191489 1.03191489 1.03191489 1.03191489]
+ [1.04255319 1.04255319 1.04255319 1.04255319 1.04255319]
+ [1.05319149 1.05319149 1.05319149 1.05319149 1.05319149]]
+===================================
 loss :  1.123240849665308e-06
 x_test[0] :  [ 96  97  98  99 100]
 y_pred[0] :  [100.99957]

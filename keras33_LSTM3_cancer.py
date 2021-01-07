@@ -1,11 +1,7 @@
-#. 실습acc > 0.985 
-#. 실습predict print
-#. sklearn.onehotencoding
-
-    # y[-5:-1] = 0 or 1 (?????)
-    # y_pred = model.predict(x[-5:-1])
-    # print(y_pred)
-    # print(y[-5:-1])
+#  사이킷 런
+# LSTM 모델링
+#  덴스와 성능 비교
+#  이진분류
 
 import numpy as np
 from sklearn.datasets import load_breast_cancer
@@ -44,15 +40,6 @@ print(datasets.feature_names)
         - concave points (number of concave portions of the contour)
         - symmetry
         - fractal dimension ("coastline approximation" - 1)
-
-        The mean, standard error, and "worst" or largest (mean of the three
-        worst/largest values) of these features were computed for each image,
-        resulting in 30 features.  For instance, field 0 is Mean Radius, field
-        10 is Radius SE, field 20 is Worst Radius.
-
-        - class:
-                - WDBC-Malignant
-                - WDBC-Benign
 
     :Summary Statistics:
 
@@ -93,21 +80,6 @@ print(datasets.feature_names)
     fractal dimension (worst):            0.055  0.208
     ===================================== ====== ======
 
-    :Missing Attribute Values: None
-    :Class Distribution: 212 - Malignant, 357 - Benign
-    :Creator:  Dr. William H. Wolberg, W. Nick Street, Olvi L. Mangasarian
-    :Donor: Nick Street
-    :Date: November, 1995
-
-['mean radius' 'mean texture' 'mean perimeter' 'mean area'
- 'mean smoothness' 'mean compactness' 'mean concavity'
- 'mean concave points' 'mean symmetry' 'mean fractal dimension'
- 'radius error' 'texture error' 'perimeter error' 'area error'
- 'smoothness error' 'compactness error' 'concavity error'
- 'concave points error' 'symmetry error' 'fractal dimension error'
- 'worst radius' 'worst texture' 'worst perimeter' 'worst area'
- 'worst smoothness' 'worst compactness' 'worst concavity'
- 'worst concave points' 'worst symmetry' 'worst fractal dimension']
 """
 
 #1.1 Data Preprocessing / train_test_splitm /  MinMaxScaler
@@ -125,22 +97,16 @@ x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
 x_val = scaler.transform(x_val)
 
+x_train = x_train.reshape(x_train.shape[0],x_train.shape[1],1)
+x_test = x_test.reshape(x_test.shape[0],x_test.shape[1],1)
+x_val = x_val.reshape(x_val.shape[0],x_val.shape[1],1)
+
 #2.model
 from tensorflow.keras.models import Sequential , Model
-from tensorflow.keras.layers import Dense, Input
+from tensorflow.keras.layers import Dense, Input, LSTM
 
-# model = Sequential()
-# model.add(Dense(100,activation="relu", input_shape=(30,)))
-# model.add(Dense(20,activation="relu"))
-# model.add(Dense(20,activation="relu"))
-# model.add(Dense(20,activation="relu"))
-# model.add(Dense(20,activation="relu"))
-# model.add(Dense(20,activation="relu"))
-# model.add(Dense(100,activation="relu"))
-# model.add(Dense(1, activation="sigmoid"))
-
-input1 = Input(shape=(30,))
-d1 = Dense(1000, activation='sigmoid')(input1)
+input1 = Input(shape=(30,1))
+d1 = LSTM(50, activation='sigmoid')(input1)
 dh = Dense(50, activation='sigmoid')(d1)
 dh = Dense(20, activation='sigmoid')(d1)
 dh = Dense(30, activation='sigmoid')(d1)
@@ -166,6 +132,8 @@ y_pred = np.array(model.predict(x_train[-5:-1]))
 # print(y_pred.argmax(axis=1))
 print(np.where(y_pred>=0.5,1,0))
 print(y[-5:-1])
+
+# Dense model
 """
     loss :  0.47400525212287903
     acc :  0.8245614171028137
@@ -178,4 +146,12 @@ print(y[-5:-1])
 
     loss :  0.0458456426858902
     acc :  0.9912280440330505
+"""
+#  LSTM Model
+"""
+loss :  0.1545499563217163
+acc :  0.9385964870452881
+
+loss :  0.19924435019493103
+acc :  0.9473684430122375
 """

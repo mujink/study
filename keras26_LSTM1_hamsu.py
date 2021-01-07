@@ -25,7 +25,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 scaler = MinMaxScaler()
 scaler.fit(x)
-x_train = scaler.transform(x)
+x = scaler.transform(x)
 
 x = x.reshape(13,3,1)
 
@@ -36,7 +36,7 @@ x = x.reshape(13,3,1)
 x_train, x_test, y_train, y_test = train_test_split(
     x, y,train_size = 0.8, test_size=0.2, shuffle=True, random_state=66 )
 x_train, x_val, y_train, y_val = train_test_split(
-    x_train, x_train,train_size = 0.8, test_size=0.2, shuffle=True, random_state=66 )
+    x_train, y_train,train_size = 0.8, test_size=0.2, shuffle=True, random_state=66 )
 
 
 #2. model config

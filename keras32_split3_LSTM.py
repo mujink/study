@@ -39,16 +39,16 @@ predictset = np.array(split_x(b, 6))            # (5,6)
 y_pred = predictset[:,-1]                                       # (5,5)
 x_pred = predictset[:,:5]                                       # (5,)
 
-print(x_pred[0])
-print(x_pred[1])
-print(x_pred[2])
-print(x_pred[3])
-print(x_pred[4])
-print(y_pred[0])
-print(y_pred[1])
-print(y_pred[2])
-print(y_pred[3])
-print(y_pred[4])
+# print(x_pred[0])
+# print(x_pred[1])
+# print(x_pred[2])
+# print(x_pred[3])
+# print(x_pred[4])
+# print(y_pred[0])
+# print(y_pred[1])
+# print(y_pred[2])
+# print(y_pred[3])
+# print(y_pred[4])
 
 
 #1.1
@@ -70,11 +70,6 @@ x_train, x_test, y_train, y_test = train_test_split(
 x_train, x_val, y_train, y_val = train_test_split(
     x_train, y_train, train_size = 0.8, test_size=0.2, shuffle=True, random_state=66 )
 
-print(x_train,'\n')
-print(x_test,'\n')
-print(x_val,'\n')
-
-
 
 scaler = MinMaxScaler()
 scaler.fit(x_train)
@@ -83,29 +78,12 @@ x_test = scaler.transform(x_test)
 x_val = scaler.transform(x_val)
 x_pred = scaler.transform(x_pred)
 
-print(x_train,'\n')
-print(x_test,'\n')
-print(x_val,'\n')
-
-print(x_train.shape) #(60,5)
-print(x_test.shape)  #(19,5)
-print(x_val.shape)   #(16,5)
-print(x_pred.shape)  #(5,5)
 
 x_train = x_train.reshape(x_train.shape[0],x_train.shape[1],1) #(95,5) => (95,5,1)
 x_test = x_test.reshape(x_test.shape[0],x_test.shape[1],1) #(95,5) => (95,5,1)
 x_val = x_val.reshape(x_val.shape[0],x_val.shape[1],1) #(95,5) => (95,5,1)
 x_pred = x_pred.reshape(x_pred.shape[0],x_pred.shape[1],1) #(5,5) => (5,5,1)
 
-print(x_train.shape) #(60,5)
-print(x_test.shape)  #(19,5)
-print(x_val.shape)   #(16,5)
-print(x_pred.shape)  #(5,5)
-
-print(x_train,'\n') #(60,5)
-print(x_test,'\n')  #(19,5)
-print(x_val,'\n')   #(16,5)
-print(x_pred)  #(5,5) 
 
 #2. model config
 from tensorflow.keras.models import Sequential , Model
