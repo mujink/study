@@ -24,8 +24,6 @@ from sklearn.model_selection import train_test_split
 x_train, x_test, y_train, y_test = train_test_split(
     x, y, shuffle=True, train_size=0.8, random_state=33
 )
-
-from sklearn.model_selection import train_test_split
 x_train, x_val, y_train, y_val = train_test_split(
     x_train, y_train,  test_size=0.2
 )
@@ -34,11 +32,9 @@ x_train, x_val, y_train, y_val = train_test_split(
 from sklearn.preprocessing import MinMaxScaler
 scaler = MinMaxScaler()
 scaler.fit(x_train)
-
 x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
 x_val = scaler.transform(x_val)
-
 
 # 2. model
 

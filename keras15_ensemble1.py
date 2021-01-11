@@ -27,7 +27,6 @@ x1_train, x1_test, y1_train, y1_test = train_test_split(
 print(x1_train.shape)          #(100,3)
 print(y1_train.shape)          #(100,3)
 
-from sklearn.model_selection import train_test_split
 x2_train, x2_test, y2_train, y2_test = train_test_split(
     x2, y2, shuffle=False, train_size=0.8
 )
