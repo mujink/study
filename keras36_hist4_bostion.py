@@ -1,3 +1,8 @@
+출력값 확인할 것
+# hist를 이용하여 그래프를 그리시오.
+# loss, val_loss, acc, val_acc
+
+
 #1. Data
 import numpy as np
 from sklearn.datasets import load_boston

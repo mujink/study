@@ -1,3 +1,7 @@
+
+# 실습
+# 드랍아웃적용
+
 # hist를 이용하여 그래프를 그리시오.
 # loss, val_loss, acc, val_acc
 
@@ -106,11 +110,13 @@ x_val = scaler.transform(x_val)
 
 #2.model
 from tensorflow.keras.models import Sequential , Model
-from tensorflow.keras.layers import Dense, Input, LSTM
+from tensorflow.keras.layers import Dense, Input, LSTM, Dropout
 
 input1 = Input(shape=(30,))
 d1 = Dense(50, activation='sigmoid')(input1)
+dh = Dropout(0.1)(d1)
 dh = Dense(50, activation='sigmoid')(d1)
+dh = Dense(50, activation='sigmoid')(dh)
 dh = Dense(20, activation='sigmoid')(dh)
 dh = Dense(30, activation='sigmoid')(dh)
 dh = Dense(30, activation='sigmoid')(dh)
@@ -174,4 +180,32 @@ acc :  0.9385964870452881
 
 loss :  0.19924435019493103
 acc :  0.9473684430122375
+
+loss: 0.0611 - acc: 0.9808 - val_loss: 0.0443 - val_acc: 0.9780
+loss :  0.10577856749296188
+acc :  0.9736841917037964
+
+loss: 0.0411 - acc: 0.9918 - val_loss: 0.0803 - val_acc: 0.9780
+loss :  0.15244239568710327
+acc :  0.9649122953414917
+
+"""
+
+""" Dropout => 큰 차이 없음
+only layer 1 = Dropout = 0.1
+loss: 0.0678 - acc: 0.9808 - val_loss: 0.0464 - val_acc: 0.9890
+loss :  0.11772410571575165
+acc :  0.9736841917037964
+
+loss: 0.0808 - acc: 0.9670 - val_loss: 0.0445 - val_acc: 0.9890
+loss :  0.11623887717723846
+acc :  0.9649122953414917
+
+loss: 0.0832 - acc: 0.9780 - val_loss: 0.0603 - val_acc: 0.9780
+loss :  0.13055634498596191
+acc :  0.9649122953414917
+
+loss: 0.0845 - acc: 0.9780 - val_loss: 0.0556 - val_acc: 0.9780
+loss :  0.12607094645500183
+acc :  0.9649122953414917
 """

@@ -1,3 +1,6 @@
+# 실습
+# 드랍아웃적용
+
 # hist를 이용하여 그래프를 그리시오.
 # loss, val_loss, acc, val_acc
 
@@ -38,11 +41,12 @@ x_val = scaler.transform(x_val)
 # 2. model
 
 from tensorflow.keras.models import Model, Sequential
-from tensorflow.keras.layers import Dense, Input, LSTM
+from tensorflow.keras.layers import Dense, Input, LSTM, Dropout
 
 
 model = Sequential()
 model.add(Dense(128, input_shape=(10,), activation='linear'))
+model.add(Dropout(0.1))
 model.add(Dense(64, activation='linear'))
 model.add(Dense(64, activation='linear'))
 model.add(Dense(64, activation='linear'))
@@ -61,7 +65,7 @@ model.add(Dense(1))
 
 # # 2.1 model def
 # model = Model(inputs =  input1, outputs = outputs)
-# model.summary()
+model.summary()
 
 # 3. Compile, Train
 
@@ -178,4 +182,40 @@ loss :  3241.644287109375
 mae :  44.615570068359375
 RMSE : 56.93543673690737
 R2 : 0.40132505612120084
+"""
+
+""""
+model.add(Dropout(0.2))
+loss :  3259.928955078125
+mae :  44.143516540527344
+RMSE : 57.09578922086228
+R2 : 0.3979481012667395
+
+model.add(Dropout(0.1))
+loss :  3151.398193359375
+mae :  43.59389114379883
+RMSE : 56.13731514757884
+R2 : 0.41799187784406355
+
+loss: 3257.3347 - mae: 47.2485 - val_loss: 1925.3838 - val_mae: 34.5382
+loss: 3545.1812 - mae: 46.8737 - val_loss: 2668.2778 - val_mae: 40.6394
+
+only layer 1  = model.add(Dropout(0.2)) @@@@@@@@ 향상됨. 
+loss: 3094.2766 - mae: 44.2753 - val_loss: 3248.8635 - val_mae: 44.9760
+loss :  3625.65380859375
+mae :  47.551231384277344
+RMSE : 60.21340316471222
+R2 : 0.3304051318824316
+
+loss: 2976.1709 - mae: 44.1738 - val_loss: 2856.5759 - val_mae: 44.5664
+loss :  3119.40087890625
+mae :  44.272979736328125
+RMSE : 55.85159714665915
+R2 : 0.4239012099593499
+
+loss: 2945.2297 - mae: 44.2248 - val_loss: 2873.4043 - val_mae: 44.7376
+loss :  3153.426025390625
+mae :  44.5692253112793
+RMSE : 56.15537345646558
+R2 : 0.41761737568399837
 """

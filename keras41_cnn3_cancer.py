@@ -1,10 +1,6 @@
-# hist를 이용하여 그래프를 그리시오.
-# loss, val_loss, acc, val_acc
+# cnn으로 구성
+# 2차원을 4차원으로 늘여서 하시오/
 
-#  사이킷 런
-# LSTM 모델링
-#  덴스와 성능 비교
-#  이진분류
 
 import numpy as np
 from sklearn.datasets import load_breast_cancer
@@ -87,91 +83,83 @@ print(datasets.feature_names)
 
 #1.1 Data Preprocessing / train_test_splitm /  MinMaxScaler
 
+
 from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(
+    x, y, shuffle=True, train_size=0.8, random_state=33
+)
+
+x_train, x_val, y_train, y_val = train_test_split(
+    x_train, y_train,  test_size=0.2
+)
+
+# x의 값들을 0~1 사이 값으로 줄임 => 가중치를 낮추어 연산 속도가 빨라짐.
+
 from sklearn.preprocessing import MinMaxScaler
-
-
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.8, shuffle = True, random_state=1)
-x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, train_size = 0.8, shuffle = True, random_state=1)
-
 scaler = MinMaxScaler()
 scaler.fit(x_train)
-x_train = scaler.transform(x_train)     
+x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
 x_val = scaler.transform(x_val)
 
-# x_train = x_train.reshape(x_train.shape[0],x_train.shape[1],1)
-# x_test = x_test.reshape(x_test.shape[0],x_test.shape[1],1)
-# x_val = x_val.reshape(x_val.shape[0],x_val.shape[1],1)
+x_train = x_train.reshape(x_train.shape[0],x_train.shape[1],1,1)
+x_test = x_test.reshape(x_test.shape[0],x_test.shape[1],1,1)
+x_val = x_val.reshape(x_val.shape[0],x_val.shape[1],1,1)
+# (x_test.reshap(506, 13, 1, 1))
 
-#2.model
-from tensorflow.keras.models import Sequential , Model
-from tensorflow.keras.layers import Dense, Input, LSTM
 
-input1 = Input(shape=(30,))
-d1 = Dense(50, activation='sigmoid')(input1)
-dh = Dense(50, activation='sigmoid')(d1)
-dh = Dense(20, activation='sigmoid')(dh)
-dh = Dense(30, activation='sigmoid')(dh)
-dh = Dense(30, activation='sigmoid')(dh)
-outputs = Dense(1, activation='sigmoid')(dh)
+from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPool2D, Dropout ,Activation
+from tensorflow.keras.models import Sequential
 
-model = Model(inputs =  input1, outputs = outputs)
+model = Sequential()
+model.add(Conv2D(filters = 1, kernel_size=(1,1), input_shape=(x_train.shape[1],1,1)))
+
+model.add(Flatten())                                            # 1dim
+model.add(Dense(50, activation='sigmoid'))
+model.add(Dense(30, activation='sigmoid'))
+model.add(Dense(10, activation='sigmoid'))
+model.add(Dense(1, activation='sigmoid'))
+
 model.summary()
 
+print(x_train.shape)
 #3. Compile, train / binary_corssentropy
-from tensorflow.keras.callbacks import EarlyStopping
-                # mean_squared_error
-early_stopping = EarlyStopping(monitor='loss', patience=10, mode='min') 
+
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc'])
-hist = model.fit(x_train, y_train, epochs=1000, validation_data=(x_val, y_val), batch_size=3, verbose=1, callbacks=[early_stopping])
+hist = model.fit(x_train, y_train, epochs=500, verbose=1, batch_size= 10, validation_data=(x_val, y_val))
+# model.fit(x_train, y_train, epochs=1000)
 
 #4. Evaluate, predict
-loss, acc = model.evaluate(x_test,y_test, batch_size=3)
-print("loss : ", loss)
-print("acc : ", acc)
+loss, acc = model.evaluate(x_test, y_test, batch_size=3)
 
-y_pred = np.array(model.predict(x_train[-5:-1]))
-# print(y_pred.argmax(axis=1))
-print(np.where(y_pred>=0.5,1,0))
-print(y[-5:-1])
+print("loss : ", loss)
+print("mae : ", acc)
+
+y_predict = model.predict(x_test)
+
+
+from sklearn.metrics import r2_score
+r2_m1 = r2_score(y_test, y_predict)
+
+print("R2 :", r2_m1 )
+
+
+# fit.. hist
 
 print(hist)
 print(hist.history.keys()) #dict_keys(['loss', 'acc', 'val_loss', 'val_acc'])
 
-# print(hist.history['loss'])
-
-# grap
 import matplotlib.pyplot as plt
 plt.plot(hist.history['loss'])
-plt.plot(hist.history['val_loss'])
 plt.plot(hist.history['acc'])
-plt.plot(hist.history['val_acc'])
-plt.title('Cansor')
+plt.title('cnn cancer')
 plt.ylabel('loss, acc')
 plt.xlabel('epoch')
-plt.legend(['train loss', 'val_loss', 'acc', 'val_acc'])
+plt.legend(['train loss', 'acc'])
 plt.show()
 
-# Dense model
 """
-    loss :  0.47400525212287903
-    acc :  0.8245614171028137
-
-    loss :  0.32467013597488403
-    acc :  0.9736841917037964
-
-    loss :  0.01316804252564907
-    acc :  0.9912280440330505
-
-    loss :  0.0458456426858902
-    acc :  0.9912280440330505
-"""
-#  LSTM Model
-"""
-loss :  0.1545499563217163
-acc :  0.9385964870452881
-
-loss :  0.19924435019493103
-acc :  0.9473684430122375
+loss :  0.12232113629579544
+mae :  0.9736841917037964
+R2 : 0.9153961797099273
 """
