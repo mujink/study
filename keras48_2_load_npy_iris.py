@@ -1,32 +1,28 @@
-
-
-import matplotlib.pyplot as plt
-
-
 import numpy as np
-from tensorflow.keras.datasets import fashion_mnist
 
-(x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
+x_data = np.load('../data/npy/iris_x.npy')
+y_data = np.load('../data/npy/iris_y.npy')
 
-print(x_train.shape, y_train.shape)             # (60000, 28, 28) (60000,)
-print(x_test.shape, y_test.shape)               # (10000, 28, 28) (10000,)
+print(x_data)
+print(y_data)
+print(x_data.shape)
+print(y_data.shape)
 
-# print(x_train[0])
-# print(x_train[0].shape)
-print("y_train[0] :",y_train[0])
+# 모델을 완성하시오
 
-
-print(x_train.min(), x_train.max())
-# (x_test.reshap(10000, 28, 28, 1))
-
+#preprocessing
 from sklearn.model_selection import train_test_split
 
+x_train, x_test, y_train, y_test = train_test_split(x_data, y_data, train_size = 0.8, shuffle = True, random_state=1)
 x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, train_size = 0.8, shuffle = True, random_state=1)
 
-x_train = x_train.reshape(x_train.shape[0],x_train.shape[1],x_train.shape[2],1).astype('float32')/255.
-x_test = x_test.reshape(x_test.shape[0],x_test.shape[1],x_test.shape[2],1).astype('float32')/255.
-x_val = x_val.reshape(x_val.shape[0],x_val.shape[1],x_val.shape[2],1).astype('float32')/255.
-# (x_test.reshap(10000, 28, 28, 1))
+from sklearn.preprocessing import MinMaxScaler
+
+scaler = MinMaxScaler()
+scaler.fit(x_train)
+x_train = scaler.transform(x_train)     
+x_test = scaler.transform(x_test)
+x_val = scaler.transform(x_val)
 
 from sklearn.preprocessing import OneHotEncoder
 one = OneHotEncoder()                           
@@ -44,38 +40,30 @@ from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPool2D, Dropout ,
 from tensorflow.keras.models import Sequential
 
 model = Sequential()
-model.add(Conv2D(filters = 10, kernel_size=(10,10), strides=1,    # kernel_size 자르는 사이즈
-     padding= "same", input_shape=(28,28,1)))
-model.add(MaxPool2D(pool_size=(1,1)))                          # 특성 추출. 
-model.add(Activation('relu'))
-model.add(Dropout(0.2))
-model.add(Conv2D(10, (2,2), padding='valid'))
-model.add(MaxPool2D(pool_size=(2,2)))                          # 특성 추출. 
-model.add(Activation('relu'))
-# model.add(Dropout(0.2))
-model.add(Flatten())                                            # 1dim
-model.add(Dense(20, activation='relu'))
-# model.add(Dense(100))
-model.add(Dense(10, activation='softmax'))
-
+model.add(Dense(50,activation="relu", input_shape=(4,)))
+model.add(Dropout(0.1))
+model.add(Dense(30,activation="relu"))
+model.add(Dense(20,activation="relu"))
+model.add(Dense(10,activation="relu"))
+model.add(Dense(5,activation="relu"))
+model.add(Dense(3, activation="softmax"))
 model.summary()
 
 
 #3. Compile, train / binary_corssentropy
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-modelpath = "../data/modelCheckPoint/k46_MC-1_{epoch:02d}_{val_loss:.4f}.hdf5"  # 가중치 저장 위치
-early_stopping = EarlyStopping(monitor='val_loss', patience=5, mode='min')
+modelpath = "./modelCheckpoint/k46_MC-7_{epoch:02d}_{val_loss:.4f}.hdf5"  # 가중치 저장 위치
+early_stopping = EarlyStopping(monitor='val_loss', patience=10, mode='min')
 cp = ModelCheckpoint(filepath=(modelpath), monitor='val_loss', save_best_only=True, mode='auto')
 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['acc'])
-hist = model.fit(x_train, y_train, epochs=30, verbose=1, validation_data=(x_val, y_val), batch_size= 32, callbacks=[early_stopping, cp])
-# model.fit(x_train, y_train, epochs=1000)
+hist = model.fit(x_train, y_train, epochs=300, verbose=1, validation_data=(x_val, y_val), batch_size= 1, callbacks=[early_stopping, cp])
 
 #4. Evaluate, predict
-loss, mae = model.evaluate(x_test, y_test, batch_size=3)
+loss, acc = model.evaluate(x_test, y_test, batch_size=30)
 
 print("loss : ", loss)
-print("acc : ", mae)
+print("acc : ", acc)
 
 y_predict = model.predict(x_test)
 
@@ -111,9 +99,3 @@ plt.ylabel('acc')
 plt.xlabel('epoch')
 plt.legend(loc='upper right')
 plt.show()
-
-"""
-loss :  0.2840123176574707
-acc :  0.9013000130653381
-R2 : 0.839886782703406
-"""

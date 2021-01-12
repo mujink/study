@@ -1,44 +1,25 @@
 
-
+import numpy as np
 import matplotlib.pyplot as plt
 
+from tensorflow.keras.datasets import mnist
 
-import numpy as np
-from tensorflow.keras.datasets import fashion_mnist
-
-(x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
 
 print(x_train.shape, y_train.shape)             # (60000, 28, 28) (60000,)
 print(x_test.shape, y_test.shape)               # (10000, 28, 28) (10000,)
 
-# print(x_train[0])
-# print(x_train[0].shape)
-print("y_train[0] :",y_train[0])
-
-
-print(x_train.min(), x_train.max())
-# (x_test.reshap(10000, 28, 28, 1))
-
-from sklearn.model_selection import train_test_split
-
-x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, train_size = 0.8, shuffle = True, random_state=1)
-
 x_train = x_train.reshape(x_train.shape[0],x_train.shape[1],x_train.shape[2],1).astype('float32')/255.
 x_test = x_test.reshape(x_test.shape[0],x_test.shape[1],x_test.shape[2],1).astype('float32')/255.
-x_val = x_val.reshape(x_val.shape[0],x_val.shape[1],x_val.shape[2],1).astype('float32')/255.
-# (x_test.reshap(10000, 28, 28, 1))
 
 from sklearn.preprocessing import OneHotEncoder
 one = OneHotEncoder()                           
 y_train = y_train.reshape(-1,1)                 
 y_test = y_test.reshape(-1,1)                 
-y_val = y_val.reshape(-1,1)                 
 one.fit(y_train)                          
 one.fit(y_test)                          
-one.fit(y_val)                          
 y_train = one.transform(y_train).toarray()
 y_test = one.transform(y_test).toarray()
-y_val = one.transform(y_val).toarray()
 
 from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPool2D, Dropout ,Activation
 from tensorflow.keras.models import Sequential
@@ -52,68 +33,33 @@ model.add(Dropout(0.2))
 model.add(Conv2D(10, (2,2), padding='valid'))
 model.add(MaxPool2D(pool_size=(2,2)))                          # 특성 추출. 
 model.add(Activation('relu'))
-# model.add(Dropout(0.2))
 model.add(Flatten())                                            # 1dim
 model.add(Dense(20, activation='relu'))
-# model.add(Dense(100))
 model.add(Dense(10, activation='softmax'))
 
-model.summary()
-
+# 모델만 저장할 경우 모델세이브 위치.
+model.save('../data/h5/k52_1_model1.h5') 
 
 #3. Compile, train / binary_corssentropy
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-modelpath = "../data/modelCheckPoint/k46_MC-1_{epoch:02d}_{val_loss:.4f}.hdf5"  # 가중치 저장 위치
+modelpath = "../data/modelCheckpoint/k52_1_mnist_MCK_{epoch:02d}_{val_loss:.4f}.hdf5"  # 가중치 저장 위치 (.hdf5)
 early_stopping = EarlyStopping(monitor='val_loss', patience=5, mode='min')
 cp = ModelCheckpoint(filepath=(modelpath), monitor='val_loss', save_best_only=True, mode='auto')
 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['acc'])
-hist = model.fit(x_train, y_train, epochs=30, verbose=1, validation_data=(x_val, y_val), batch_size= 32, callbacks=[early_stopping, cp])
+hist = model.fit(x_train, y_train, epochs=30, verbose=1, validation_split=0.2, batch_size= 32, callbacks=[early_stopping, cp])
 # model.fit(x_train, y_train, epochs=1000)
+
+
+# 가중치와 모델을 함께 저장할 경우 모델세이브 위치.
+model.save('../data/h5/k52_1_model2.h5')
+# 핏 후 저장하면 가중치도 같이 저장됨.
+
+# 가중치 저장 (h5)
+model.save_weights('../data/h5/k52_1_weight.h5')
 
 #4. Evaluate, predict
 loss, mae = model.evaluate(x_test, y_test, batch_size=3)
 
 print("loss : ", loss)
 print("acc : ", mae)
-
-y_predict = model.predict(x_test)
-
-
-from sklearn.metrics import r2_score
-r2_m1 = r2_score(y_test, y_predict)
-
-print("R2 :", r2_m1 )
-
-
-# fit.. hist
-
-import matplotlib.pyplot as plt
-import matplotlib.font_manager as font
-plt.figure(figsize=(10,6))          # plot 사이즈
-plt.subplot(2,1,1)              # 2행 1열 중 첫번쨰
-plt.plot(hist.history['loss'], marker='.', c='red', label='loss')
-plt.plot(hist.history['val_loss'], marker='.', c='blue', label= 'val_loss')
-plt.grid() # 격자
-
-plt.title('Cost Loss')
-plt.ylabel('loss')
-plt.xlabel('epoch')
-plt.legend(loc='upper right')
-
-plt.subplot(2,1,2)              # 2행 2열 중 두번쨰
-plt.plot(hist.history['acc'], marker='.', c='green', label='acc')
-plt.plot(hist.history['val_acc'], marker='.', c='yellow', label= 'val_acc')
-plt.grid() # 격자
-
-plt.title('Accuracy')
-plt.ylabel('acc')
-plt.xlabel('epoch')
-plt.legend(loc='upper right')
-plt.show()
-
-"""
-loss :  0.2840123176574707
-acc :  0.9013000130653381
-R2 : 0.839886782703406
-"""

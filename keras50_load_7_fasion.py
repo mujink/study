@@ -1,23 +1,13 @@
-
-
-import matplotlib.pyplot as plt
-
-
 import numpy as np
-from tensorflow.keras.datasets import fashion_mnist
+x_train = '../data/npy/tahion_x_train.npy'
+x_test = '../data/npy/tahion_x_test.npy'
+y_train = '../data/npy/tahion_y_train.npy'
+y_test = '../data/npy/tahion_y_test.npy'
+x_train = np.load(x_train)
+x_test = np.load(x_test)
+y_train = np.load(y_train)
+y_test = np.load(y_test)
 
-(x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
-
-print(x_train.shape, y_train.shape)             # (60000, 28, 28) (60000,)
-print(x_test.shape, y_test.shape)               # (10000, 28, 28) (10000,)
-
-# print(x_train[0])
-# print(x_train[0].shape)
-print("y_train[0] :",y_train[0])
-
-
-print(x_train.min(), x_train.max())
-# (x_test.reshap(10000, 28, 28, 1))
 
 from sklearn.model_selection import train_test_split
 
@@ -63,7 +53,7 @@ model.summary()
 
 #3. Compile, train / binary_corssentropy
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-modelpath = "../data/modelCheckPoint/k46_MC-1_{epoch:02d}_{val_loss:.4f}.hdf5"  # 가중치 저장 위치
+modelpath = "../data/modelCheckpoint/k46_MC-1_{epoch:02d}_{val_loss:.4f}.hdf5"  # 가중치 저장 위치
 early_stopping = EarlyStopping(monitor='val_loss', patience=5, mode='min')
 cp = ModelCheckpoint(filepath=(modelpath), monitor='val_loss', save_best_only=True, mode='auto')
 

@@ -40,7 +40,7 @@ model.summary()
 
 #3. Compile, train / binary_corssentropy
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-modelpath = "./modelCheckpoint/k46_MC-6_{epoch:02d}_{val_loss:.4f}.hdf5"  # 가중치 저장 위치
+modelpath = "../data/modelCheckpoint/k46_MC-6_{epoch:02d}_{val_loss:.4f}.hdf5"  # 가중치 저장 위치
 early_stopping = EarlyStopping(monitor='val_loss', patience=5, mode='min')
 cp = ModelCheckpoint(filepath=(modelpath), monitor='val_loss', save_best_only=True, mode='auto')
 

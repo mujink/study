@@ -65,7 +65,7 @@ model.summary()
 
 #3. Compile, train / binary_corssentropy
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-modelpath = "./modelCheckpoint/k45_mnist_{epoch:02d}_{val_loss:.4f}.hdf5"  # 가중치 저장 위치
+modelpath = "../data/modelCheckPoint/k45_mnist_{epoch:02d}_{val_loss:.4f}.hdf5"  # 가중치 저장 위치
 early_stopping = EarlyStopping(monitor='val_loss', patience=5, mode='min')
 cp = ModelCheckpoint(filepath=(modelpath), monitor='val_loss', save_best_only=True, mode='auto')
 
@@ -110,8 +110,8 @@ plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(loc='upper right')
 plt.subplot(2,1,2)              # 2행 2열 중 두번쨰
-plt.plot(hist.history['acc'], marker='.', c='green', label='acc')
-plt.plot(hist.history['val_acc'], marker='.', c='yellow', label= 'val_acc')
+plt.plot(hist.history['acc'], marker='.', c='green')
+plt.plot(hist.history['val_acc'], marker='.', c='yellow')
 plt.grid() # 격자
 
 # plt.title('정확도', fontproperties=fontprop)
@@ -119,7 +119,7 @@ plt.title('정확도')
 # plt.title('Accuracy')
 plt.ylabel('acc')
 plt.xlabel('epoch')
-plt.legend(loc='upper right')
+plt.legend(['acc', 'val_acc'])
 plt.show()
 
 

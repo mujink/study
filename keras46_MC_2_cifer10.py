@@ -34,17 +34,17 @@ from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPool2D, Dropout ,
 from tensorflow.keras.models import Sequential
 
 model = Sequential()
-model.add(Conv2D(filters = 10, kernel_size=(10,10), strides=1,    # kernel_size 자르는 사이즈
+model.add(Conv2D(filters = 32, kernel_size=(10,10), strides=1,    # kernel_size 자르는 사이즈
      padding= "same", input_shape=(32,32,3)))
 model.add(MaxPool2D(pool_size=(1,1)))                          # 특성 추출. 
 model.add(Activation('relu'))
-model.add(Dropout(0.2))
-model.add(Conv2D(10, (2,2), padding='valid'))
-model.add(MaxPool2D(pool_size=(2,2)))                          # 특성 추출. 
-model.add(Activation('relu'))
+# model.add(Dropout(0.2))
+# model.add(Conv2D(32, (2,2), padding='valid'))
+# model.add(MaxPool2D(pool_size=(2,2)))                          # 특성 추출. 
+# model.add(Activation('relu'))
 # model.add(Dropout(0.2))
 model.add(Flatten())                                            # 1dim
-model.add(Dense(20, activation='relu'))
+model.add(Dense(10, activation='relu'))
 # model.add(Dense(100))
 model.add(Dense(10, activation='softmax'))
 
@@ -53,16 +53,16 @@ model.summary()
 
 #3. Compile, train / binary_corssentropy
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-modelpath = "./modelCheckpoint/k46_MC-2_{epoch:02d}_{val_loss:.4f}.hdf5"  # 가중치 저장 위치
+modelpath = "../data/modelCheckPoint/k46_MC-2_{epoch:02d}_{val_loss:.4f}.hdf5"  # 가중치 저장 위치
 early_stopping = EarlyStopping(monitor='val_loss', patience=5, mode='min')
 cp = ModelCheckpoint(filepath=(modelpath), monitor='val_loss', save_best_only=True, mode='auto')
 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['acc'])
-hist = model.fit(x_train, y_train, epochs=30, verbose=1, validation_data=(x_val, y_val), batch_size= 32, callbacks=[early_stopping, cp])
+hist = model.fit(x_train, y_train, epochs=30, verbose=1, validation_data=(x_val, y_val), batch_size= 128, callbacks=[early_stopping, cp])
 # model.fit(x_train, y_train, epochs=1000)
 
 #4. Evaluate, predict
-loss, mae = model.evaluate(x_test, y_test, batch_size=3)
+loss, mae = model.evaluate(x_test, y_test, batch_size=128)
 
 print("loss : ", loss)
 print("acc : ", mae)

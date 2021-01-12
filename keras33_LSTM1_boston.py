@@ -31,16 +31,14 @@ x_train = x_train.reshape(x_train.shape[0],x_train.shape[1],1)
 x_test = x_test.reshape(x_test.shape[0],x_test.shape[1],1)
 x_validation = x_validation.reshape(x_validation.shape[0],x_validation.shape[1],1)
 
-
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dense, Input, LSTM
 
-
-input1 = Input(shape=(13,))
-d1 = LSTM(30, activation='relu')(input1)
+input1 = Input(shape=(13,1))
+d1 = LSTM(10, activation='relu')(input1)
 dh = Dense(50, activation='relu')(d1)
-dh = Dense(100, activation='relu')(dh)
-dh = Dense(100, activation='relu')(dh)
+dh = Dense(50, activation='relu')(dh)
+dh = Dense(20, activation='relu')(dh)
 dh = Dense(30, activation='relu')(dh)
 outputs = Dense(1)(dh)
 
@@ -57,10 +55,10 @@ early_stopping = EarlyStopping(monitor='loss', patience=30, mode='min')
 
 model.fit(
     x_train,y_train,
-    epochs=1000, batch_size=1, validation_data=(x_val, y_val), verbose=1, callbacks=(early_stopping))
+    epochs=1000, batch_size=10, validation_data=(x_validation, y_validation), verbose=1, callbacks=(early_stopping))
 
 # 4 Evaluation validation
-loss, mae= model.evaluate(x_test, y_test, batch_size=1)
+loss, mae= model.evaluate(x_test, y_test, batch_size=10)
 print('loss : ', loss)
 print('mae : ', mae)
 
@@ -81,4 +79,7 @@ from sklearn.metrics import r2_score
 r2_m1 = r2_score(y_test, y_predict)
 
 print("R2 :", r2_m1 )
-
+# mae :  3.9259557723999023
+# RMSE : 5.461534379024639
+# RMSE : 29.828357773268046
+# R2 : 0.6416749308968677

@@ -1,9 +1,9 @@
 import numpy as np
-from sklearn.datasets import load_boston
+x = '../data/npy/boston_x.npy'
+y = '../data/npy/boston_y.npy'
+x = np.load(x)
+y = np.load(y)
 
-dataset = load_boston()
-x = dataset.data
-y = dataset.target
 
 from sklearn.model_selection import train_test_split
 
@@ -34,7 +34,7 @@ model.add(Dense(1))
 #3. Compile, train / binary_corssentropy
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 modelpath = "../data/modelCheckpoint/k46_MC-4_{epoch:02d}_{val_loss:.4f}.hdf5"  # 가중치 저장 위치
-early_stopping = EarlyStopping(monitor='val_loss', patience=5, mode='min')
+early_stopping = EarlyStopping(monitor='val_loss', patience=10, mode='min')
 cp = ModelCheckpoint(filepath=(modelpath), monitor='val_loss', save_best_only=True, mode='auto')
 
 model.compile(loss='mse', optimizer='adam', metrics=['mae'])
@@ -48,7 +48,6 @@ print("loss : ", loss)
 print("mae : ", mae)
 
 y_predict = model.predict(x_test)
-
 
 from sklearn.metrics import r2_score
 r2_m1 = r2_score(y_test, y_predict)

@@ -1,9 +1,9 @@
 import numpy as np
-from sklearn.datasets import load_boston
+x = '../data/npy/cancer_x.npy'
+y = '../data/npy/cancer_y.npy'
+x = np.load(x)
+y = np.load(y)
 
-dataset = load_boston()
-x = dataset.data
-y = dataset.target
 
 from sklearn.model_selection import train_test_split
 
@@ -13,39 +13,42 @@ x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, train_size =
 from sklearn.preprocessing import MinMaxScaler
 scaler = MinMaxScaler()
 scaler.fit(x_train)
-
 x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
 x_val = scaler.transform(x_val)
 
 
-from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPool2D, Dropout ,Activation
-from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPool2D, Dropout ,Activation, Input
+from tensorflow.keras.models import Sequential, Model
 
-model = Sequential()
-model.add(Dense(50, input_dim=13, activation='relu'))
-model.add(Dense(50, activation='relu'))
-model.add(Dense(50, activation='relu'))
-model.add(Dense(50, activation='relu'))
-model.add(Dense(50, activation='relu'))
-model.add(Dense(50, activation='relu'))
-model.add(Dense(1))
+input1 = Input(shape=(30,))
+d1 = Dense(50, activation='sigmoid')(input1)
+dh = Dropout(0.1)(d1)
+dh = Dense(50, activation='sigmoid')(d1)
+dh = Dense(50, activation='sigmoid')(dh)
+dh = Dense(20, activation='sigmoid')(dh)
+dh = Dense(30, activation='sigmoid')(dh)
+dh = Dense(30, activation='sigmoid')(dh)
+outputs = Dense(1, activation='sigmoid')(dh)
+
+model = Model(inputs =  input1, outputs = outputs)
+model.summary()
 
 #3. Compile, train / binary_corssentropy
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-modelpath = "../data/modelCheckpoint/k46_MC-4_{epoch:02d}_{val_loss:.4f}.hdf5"  # 가중치 저장 위치
+modelpath = "../data/modelCheckpoint/k46_MC-6_{epoch:02d}_{val_loss:.4f}.hdf5"  # 가중치 저장 위치
 early_stopping = EarlyStopping(monitor='val_loss', patience=5, mode='min')
 cp = ModelCheckpoint(filepath=(modelpath), monitor='val_loss', save_best_only=True, mode='auto')
 
-model.compile(loss='mse', optimizer='adam', metrics=['mae'])
-hist = model.fit(x_train, y_train, epochs=300, verbose=1, validation_data=(x_val, y_val), batch_size= 32, callbacks=[early_stopping, cp])
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc'])
+hist = model.fit(x_train, y_train, epochs=300, verbose=1, validation_data=(x_val, y_val), batch_size= 1, callbacks=[early_stopping, cp])
 # model.fit(x_train, y_train, epochs=1000)
 
 #4. Evaluate, predict
-loss, mae = model.evaluate(x_test, y_test, batch_size=3)
+loss, mae = model.evaluate(x_test, y_test, batch_size=114)
 
 print("loss : ", loss)
-print("mae : ", mae)
+print("acc : ", mae)
 
 y_predict = model.predict(x_test)
 
@@ -72,22 +75,18 @@ plt.xlabel('epoch')
 plt.legend(loc='upper right')
 
 plt.subplot(2,1,2)              # 2행 2열 중 두번쨰
-plt.plot(hist.history['mae'], marker='.', c='green', label='mae')
-plt.plot(hist.history['val_mae'], marker='.', c='yellow', label= 'val_mae')
+plt.plot(hist.history['acc'], marker='.', c='green', label='acc')
+plt.plot(hist.history['val_acc'], marker='.', c='yellow', label= 'val_acc')
 plt.grid() # 격자
 
-plt.title('mae')
-plt.ylabel('mae')
+plt.title('Accuracy')
+plt.ylabel('acc')
 plt.xlabel('epoch')
 plt.legend(loc='upper right')
 plt.show()
 
 """
-loss :  18.301071166992188
-acc :  0.0
-R2 : 0.8148178532131564
-
-loss :  18.589366912841797
-mae :  3.4682559967041016
-R2 : 0.811900682586622
+loss :  0.13297922909259796
+acc :  0.9649122953414917
+R2 : 0.8640417340173554
 """

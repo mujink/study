@@ -47,7 +47,7 @@ x_val = x_val.reshape(x_val.shape[0],x_val.shape[1],1)
 #2. model
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Dense
-model = load_model('./model/save_keras35.h5')
+model = load_model('../Data/h5/save_keras35.h5')
 model.add(Dense(5,name='asd'))
 model.add(Dense(1,name='asf'))
 model.summary()
