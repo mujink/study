@@ -5,161 +5,115 @@
 import numpy as np
 from sklearn.datasets import load_breast_cancer
 
-#1. data
+#1. DATA
 datasets = load_breast_cancer()
+
+# print(datasets.DESCR)           # (569, 30)
+# print(datasets.feature_names)
 
 x = datasets.data
 y = datasets.target
-print(x.shape)      #(569,30)
-print(y.shape)      #(569,)
-print(x[:5])
-print(y)
 
-print(datasets.target_names)
-print(datasets.feature_names)
-# print(datasets.DESCR)
+# print(x.shape)  #(569, 30) , input_dim = 30
+# print(y.shape)  #(568, ) # 유방암에 걸렸는지 안 걸렸는지 , output = 1
 
-"""Breast cancer wisconsin (diagnostic) dataset
---------------------------------------------
+# print(x[:5])
+# print(y)        # 0 or 1 >> classification (이진분류)
 
-**Data Set Characteristics:**
-
-    :Number of Instances: 569
-
-    :Number of Attributes: 30 numeric, predictive attributes and the class
-
-    :Attribute Information:
-        - radius (mean of distances from center to points on the perimeter)
-        - texture (standard deviation of gray-scale values)
-        - perimeter
-        - area
-        - smoothness (local variation in radius lengths)
-        - compactness (perimeter^2 / area - 1.0)
-        - concavity (severity of concave portions of the contour)
-        - concave points (number of concave portions of the contour)
-        - symmetry
-        - fractal dimension ("coastline approximation" - 1)
-
-    :Summary Statistics:
-
-    ===================================== ====== ======
-                                           Min    Max
-    ===================================== ====== ======
-    radius (mean):                        6.981  28.11
-    texture (mean):                       9.71   39.28
-    perimeter (mean):                     43.79  188.5
-    area (mean):                          143.5  2501.0
-    smoothness (mean):                    0.053  0.163
-    compactness (mean):                   0.019  0.345
-    concavity (mean):                     0.0    0.427
-    concave points (mean):                0.0    0.201
-    symmetry (mean):                      0.106  0.304
-    fractal dimension (mean):             0.05   0.097
-
-    radius (standard error):              0.112  2.873
-    texture (standard error):             0.36   4.885
-    perimeter (standard error):           0.757  21.98
-    area (standard error):                6.802  542.2
-    smoothness (standard error):          0.002  0.031
-    compactness (standard error):         0.002  0.135
-    concavity (standard error):           0.0    0.396
-    concave points (standard error):      0.0    0.053
-    symmetry (standard error):            0.008  0.079
-    fractal dimension (standard error):   0.001  0.03
-
-    radius (worst):                       7.93   36.04
-    texture (worst):                      12.02  49.54
-    perimeter (worst):                    50.41  251.2
-    area (worst):                         185.2  4254.0
-    smoothness (worst):                   0.071  0.223
-    compactness (worst):                  0.027  1.058
-    concavity (worst):                    0.0    1.252
-    concave points (worst):               0.0    0.291
-    symmetry (worst):                     0.156  0.664
-    fractal dimension (worst):            0.055  0.208
-    ===================================== ====== ======
-
-"""
-
-#1.1 Data Preprocessing / train_test_splitm /  MinMaxScaler
-
-
+# x > preprocessing
 from sklearn.model_selection import train_test_split
-x_train, x_test, y_train, y_test = train_test_split(
-    x, y, shuffle=True, train_size=0.8, random_state=33
-)
-
-x_train, x_val, y_train, y_val = train_test_split(
-    x_train, y_train,  test_size=0.2
-)
-
-# x의 값들을 0~1 사이 값으로 줄임 => 가중치를 낮추어 연산 속도가 빨라짐.
+x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, shuffle=True, random_state=55)
+x_train, x_validation, y_train, y_validation = train_test_split(x_train, y_train, train_size=0.8)
 
 from sklearn.preprocessing import MinMaxScaler
 scaler = MinMaxScaler()
 scaler.fit(x_train)
 x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
-x_val = scaler.transform(x_val)
+x_validation = scaler.transform(x_validation)
 
-x_train = x_train.reshape(x_train.shape[0],x_train.shape[1],1,1)
-x_test = x_test.reshape(x_test.shape[0],x_test.shape[1],1,1)
-x_val = x_val.reshape(x_val.shape[0],x_val.shape[1],1,1)
-# (x_test.reshap(506, 13, 1, 1))
+# y > preprocessing
+from tensorflow.keras.utils import to_categorical
+
+y_train = to_categorical(y_train) 
+y_test = to_categorical(y_test)
+y_validation = to_categorical(y_validation)
+print(y_train.shape)    # (455, 2)
+print(y_test.shape)     # (114, 2)
 
 
-from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPool2D, Dropout ,Activation
+x_train = x_train.reshape(x_train.shape[0], x_train.shape[1],1,1)
+x_test = x_test.reshape(x_test.shape[0], x_test.shape[1],1,1)
+x_validation = x_validation.reshape(x_validation.shape[0], x_validation.shape[1],1,1)
+
+
+
+#2. Modling
 from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout
 
 model = Sequential()
-model.add(Conv2D(filters = 1, kernel_size=(1,1), input_shape=(x_train.shape[1],1,1)))
-
-model.add(Flatten())                                            # 1dim
-model.add(Dense(50, activation='sigmoid'))
+model.add(Conv2D(filters=64, kernel_size=(1,1), input_shape=(30,1,1)))
+# model.add(MaxPooling2D(pool_size=3))
+# model.add(Conv2D(filters=64, kernel_size=(4,4), padding='same', strides=1))
+# model.add(MaxPooling2D(pool_size=3))
+model.add(Flatten())
 model.add(Dense(30, activation='sigmoid'))
-model.add(Dense(10, activation='sigmoid'))
-model.add(Dense(1, activation='sigmoid'))
+model.add(Dropout(0.2))
 
-model.summary()
+model.add(Dense(30, activation='relu'))
+model.add(Dropout(0.1))
 
-print(x_train.shape)
-#3. Compile, train / binary_corssentropy
+model.add(Dense(30, activation='relu'))
+model.add(Dense(2, activation='sigmoid'))
 
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc'])
-hist = model.fit(x_train, y_train, epochs=500, verbose=1, batch_size= 10, validation_data=(x_val, y_val))
-# model.fit(x_train, y_train, epochs=1000)
 
-#4. Evaluate, predict
-loss, acc = model.evaluate(x_test, y_test, batch_size=3)
+# model.summary()
 
-print("loss : ", loss)
-print("mae : ", acc)
+# Compile, Train
+model.compile(loss="binary_crossentropy" ,optimizer='adam',metrics=['mae'])
+# model.fit(x_train, y_train, epochs=10, batch_size=64, validation_split=0.2, callbacks=[es])
+hist = model.fit(x_train, y_train, epochs=500, validation_data=(x_validation, y_validation) ,batch_size=50)
 
-y_predict = model.predict(x_test)
+# Evaluate, Predict
+loss, mae = model.evaluate(x_test, y_test, batch_size=64)
+print("loss : ",loss)
+print("mae : ",mae)
+
+
+# 응용
+# y_test 10개와 y_test 10개를 출력하시오
+
+# print("y_test[:10] :\n", y_test[:10])
+# print("y_test[:10] :")
+# print(y_test[:10])
+
+# print(np.argmax(y_test[:10],axis=1))
+
+y_predict = model.predict(x_test[:10])
+# print("y_pred[:10] :")
+# print(y_predict[:10])
 
 
 from sklearn.metrics import r2_score
-r2_m1 = r2_score(y_test, y_predict)
+r2 = r2_score(y_test[:10], y_predict)
+print("R2 : ", r2)
 
-print("R2 :", r2_m1 )
+import matplotlib.pyplot as plt 
 
-
-# fit.. hist
-
-print(hist)
-print(hist.history.keys()) #dict_keys(['loss', 'acc', 'val_loss', 'val_acc'])
-
-import matplotlib.pyplot as plt
 plt.plot(hist.history['loss'])
-plt.plot(hist.history['acc'])
-plt.title('cnn cancer')
-plt.ylabel('loss, acc')
-plt.xlabel('epoch')
-plt.legend(['train loss', 'acc'])
+plt.plot(hist.history['val_loss'])
+plt.plot(hist.history['mae'])
+plt.plot(hist.history['val_mae'])
+
+plt.title('loss & mae')
+plt.ylabel('loss, mae')
+plt.xlabel('epochs')
+plt.legend(['train loss','val loss','train mae','val mae'])
 plt.show()
 
-"""
-loss :  0.12232113629579544
-mae :  0.9736841917037964
-R2 : 0.9153961797099273
+""""
+loss :  0.09642737358808517
+mae :  0.027194436639547348
+R2 :  0.9998156451838549
 """
