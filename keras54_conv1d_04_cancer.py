@@ -1,3 +1,6 @@
+# 실습
+# conv1d로 코딩하시오
+
 import numpy as np
 x = '../data/npy/cancer_x.npy'
 y = '../data/npy/cancer_y.npy'
@@ -17,31 +20,47 @@ x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
 x_val = scaler.transform(x_val)
 
+x_train = x_train.reshape(x_train.shape[0],x_train.shape[1],1)
+x_test = x_test.reshape(x_test.shape[0],x_test.shape[1],1)
+x_val = x_val.reshape(x_val.shape[0],x_val.shape[1],1)
 
-from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPool2D, Dropout ,Activation, Input
-from tensorflow.keras.models import Sequential, Model
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPool2D, Dropout ,Activation, Conv1D, Flatten,MaxPool1D
 
-input1 = Input(shape=(30,))
-d1 = Dense(50, activation='sigmoid')(input1)
-dh = Dropout(0.1)(d1)
-dh = Dense(50, activation='sigmoid')(d1)
-dh = Dense(50, activation='sigmoid')(dh)
-dh = Dense(20, activation='sigmoid')(dh)
-dh = Dense(30, activation='sigmoid')(dh)
-dh = Dense(30, activation='sigmoid')(dh)
-outputs = Dense(1, activation='sigmoid')(dh)
-
-model = Model(inputs =  input1, outputs = outputs)
+model = Sequential()
+model.add(Conv1D(10,3 ,input_shape=(30,1) ,padding='same'))
+model.add(MaxPool1D(pool_size=(3)))                          # 특성 추출. 
+model.add(Activation('sigmoid'))
+model.add(Flatten())                                            # 1dim
+model.add(Dense(50, activation='sigmoid'))
+model.add(Dense(50, activation='sigmoid'))
+model.add(Dense(50, activation='sigmoid'))
+model.add(Dense(50, activation='sigmoid'))
+model.add(Dense(50, activation='sigmoid'))
+model.add(Dense(1))
 model.summary()
+
+# input1 = Input(shape=(30,))
+# d1 = Dense(50, activation='sigmoid')(input1)
+# dh = Dropout(0.1)(d1)
+# dh = Dense(50, activation='sigmoid')(d1)
+# dh = Dense(50, activation='sigmoid')(dh)
+# dh = Dense(20, activation='sigmoid')(dh)
+# dh = Dense(30, activation='sigmoid')(dh)
+# dh = Dense(30, activation='sigmoid')(dh)
+# outputs = Dense(1, activation='sigmoid')(dh)
+
+# model = Model(inputs =  input1, outputs = outputs)
+# model.summary()
 
 #3. Compile, train / binary_corssentropy
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-modelpath = "../data/modelCheckpoint/k46_MC-6_{epoch:02d}_{val_loss:.4f}.hdf5"  # 가중치 저장 위치
-early_stopping = EarlyStopping(monitor='val_loss', patience=5, mode='min')
-cp = ModelCheckpoint(filepath=(modelpath), monitor='val_loss', save_best_only=True, mode='auto')
+# modelpath = "../data/modelCheckpoint/k46_MC-6_{epoch:02d}_{val_loss:.4f}.hdf5"  # 가중치 저장 위치
+# early_stopping = EarlyStopping(monitor='val_loss', patience=5, mode='min')
+# cp = ModelCheckpoint(filepath=(modelpath), monitor='val_loss', save_best_only=True, mode='auto')
 
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc'])
-hist = model.fit(x_train, y_train, epochs=300, verbose=1, validation_data=(x_val, y_val), batch_size= 1, callbacks=[early_stopping, cp])
+hist = model.fit(x_train, y_train, epochs=300, verbose=1, validation_data=(x_val, y_val), batch_size= 10)#, callbacks=[early_stopping, cp])
 # model.fit(x_train, y_train, epochs=1000)
 
 #4. Evaluate, predict
