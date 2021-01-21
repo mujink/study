@@ -40,5 +40,6 @@ print(y_test.shape)
 print(y_val.shape)
 
 print(x_train)
+print(y_train)
 
 # reshape ===================================================================================================

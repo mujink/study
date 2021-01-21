@@ -90,6 +90,12 @@ GHI = 일반 일사량
 """
 # 참고 링크 : https://makerjeju.tistory.com/24
 # np.log => 괄호안에 값을 자연상수 로그한다.
+# def Add_features(data):
+#     data['cos'] = np.cos(np.pi/2 - np.abs(data['Hour']%12 - 6)/6*np.pi/2)
+#     data.insert(1,'GHI',data['DNI']*data['cos']+data['DHI'])
+#     data.drop(['cos'], axis= 1, inplace = True)
+#     return data
+    
 def Add_features(data):
     c = 243.12
     b = 17.62
@@ -97,7 +103,9 @@ def Add_features(data):
     dp = ( c * gamma) / (b - gamma)
     data.insert(1,'Td',dp)
     data.insert(1,'T-Td',data['T']-data['Td'])
-    data.insert(1,'GHI',data['DNI']+data['DHI'])
+    data['cos'] = np.cos(np.pi/2 - np.abs(data['Hour']%12 - 6)/6*np.pi/2)
+    data.insert(1,'GHI',data['DNI']*data['cos']+data['DHI'])
+    data.drop(['cos'], axis= 1, inplace = True)
     return data
 # ====== 파일 로드 ================================================================================================================================
 
@@ -109,19 +117,28 @@ TrainDbSet = Add_features(TrainDbSet)
 TestDbSet = Add_features(TestDbSet)
 
 # 드롭 안한게 더 잘나왔음 2
-# del TrainDbSet['Hour']
-# del TrainDbSet['Td']
-# del TrainDbSet['WS']
-# del TrainDbSet['RH']
+del TrainDbSet['Hour']
+del TrainDbSet['T']
+del TrainDbSet['Td']
+del TrainDbSet['T-Td']
+del TrainDbSet['WS']
+del TrainDbSet['RH']
 
-# del TestDbSet['Hour']
-# del TestDbSet['Td']
-# del TestDbSet['WS']
-# del TestDbSet['RH']
+del TestDbSet['Hour']
+del TestDbSet['T']
+del TestDbSet['Td']
+del TestDbSet['T-Td']
+del TestDbSet['WS']
+del TestDbSet['RH']
 
 TrainDbSet.to_numpy()
 print(TrainDbSet.shape)
 print(TrainDbSet)
+
+print(TestDbSet.duplicated().sum())
+
+
+
 
 TrainDbSet.to_csv('../data/csv/Dacon/preprocess_csv/TrainDbSet2.csv', encoding='ms949', sep=",")
 TestDbSet.to_csv('../data/csv/Dacon/preprocess_csv/TestDbSet2.csv', encoding='ms949', sep=",")

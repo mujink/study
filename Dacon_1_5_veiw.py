@@ -1,84 +1,98 @@
 import pandas as pd
 import numpy as np
+# ================================
+# test = pd.read_csv('../data/csv/Dacon/preprocess_csv/TrainDbSet2.csv')
+# ranges = 336
+# hours = range(ranges)
 
-submission = pd.read_csv('../data/csv/submission_v4.csv')
+# #  Hour       GHI      T-Td        Td    TARGET       DHI       DNI        WS        RH         T   Target1   Target2
+# # Hour = test['Hour'].values
+
+# test = test.iloc[:336]
+
+# GHI = test['GHI'].values
+# T_Td = test['T-Td'].values
+# Td = test['Td'].values
+# TARGET = test['TARGET'].values
+# DHI = test['DHI'].values
+# DNI = test['DNI'].values
+# WS = test['WS'].values
+# RH = test['RH'].values
+# T = test['T'].values
+# TARGET1 = test['Target1'].values
+# TARGET2 = test['Target2'].values
+# # print(type(Hour))
+# # Hour = Hour[:range]
+# # GHI = GHI[:range]
+# # T_Td = T_Td[:range]
+# # Td = Td[:range]
+# # TARGET = TARGET[:range]
+# # DHI = DHI[:range]
+# # DNI = DNI[:range]
+# # WS = WS[:range]
+# # RH = RH[:range]
+# # T = T[:range]
+# # TARGET1 = TARGET1[:range]
+# # TARGET2 = TARGET2[:range]
+
+
+# import matplotlib.pyplot as plt
+# plt.figure(figsize=(18,2.5))
+# plt.subplot(6,1,1)
+# # plt.plot(hours, Hour, color='red')
+# plt.plot(hours, GHI, color='green')
+# # plt.subplot(6,1,2)
+# # plt.plot(hours, T_Td, color='#ddff00')
+# # plt.subplot(6,1,3)
+# # plt.plot(hours, Td, color='#886611')
+# plt.subplot(6,1,4)
+# plt.plot(hours, TARGET, color='blue')
+# plt.subplot(6,1,5)
+# plt.plot(hours, DHI, color='#ffaacc')
+# plt.subplot(6,1,6)
+# plt.plot(hours, DNI, color='red')
+# # plt.plot(hours, WS, color='yellow')
+# # plt.plot(hours, RH, color='blue')
+# # plt.plot(hours, T, color='green')
+# plt.legend()
+# plt.show()
+
+# ================================
+
+submission_v4 = pd.read_csv('../data/csv/submission_v5_lgbm_500193.csv')
 # ?????
 
-print(submission['q_0.1'])
-print(type(submission))
+ranges = 336
+hours = range(ranges)
+submission_v4 = submission_v4[ranges:ranges+ranges]
 
-submission = np.array(submission)
+q_01 = submission_v4['q_0.1'].values
+q_02 = submission_v4['q_0.2'].values
+q_03 = submission_v4['q_0.3'].values
+q_04 = submission_v4['q_0.4'].values
+q_05 = submission_v4['q_0.5'].values
+q_06 = submission_v4['q_0.6'].values
+q_07 = submission_v4['q_0.7'].values
+q_08 = submission_v4['q_0.8'].values
+q_09 = submission_v4['q_0.9'].values
+
+# q_02 = q_02[ranges:ranges+ranges]
+
+
 # print(submission[0])
 
 import matplotlib.pyplot as plt
-plt.figure(figsize=(9,3.7))
-plt.subplot(3,1,1)
-plt.plot(submission, label='y_predict')
+plt.figure(figsize=(18,2.5))
+plt.subplot(1,1,1)
+plt.plot(hours, q_01, color='red')
+plt.plot(hours, q_02, color='#aa00cc')
+plt.plot(hours, q_03, color='#00ccaa')
+plt.plot(hours, q_04, color='#ccaa00')
+plt.plot(hours, q_05, color='#00aacc')
+plt.plot(hours, q_06, color='#aacc00')
+plt.plot(hours, q_07, color='#cc00aa')
+plt.plot(hours, q_08, color='#000000')
+plt.plot(hours, q_09, color='blue')
 plt.legend()
-# plt.figure(figsize=(12, 8))
-# # plt.plot(submission['q_0.1'].history)
-# # plt.plot(submission.history['q_0.2'])
-# # plt.plot(submission['q_0.3'])
-# # plt.plot(submission['q_0.4'])
-# # plt.plot(submission['q_0.5'])
-# # plt.plot(submission['q_0.6'])
-# # plt.plot(submission['q_0.7'])
-# # plt.plot(submission['q_0.8'])
-# # plt.plot(submission['q_0.9'])
-# submission.plot()
-
-# plt.title('submission (q)')
-# plt.ylabel('TARGET')
-# plt.xlabel('Time[30]')
-# plt.legend(['q_0.1','q_0.2','q_0.3','q_0.4','q_0.5','q_0.6','q_0.7','q_0.8','q_0.9'])
-# plt.show()
-
-
-
-
-
-# plot_col_index = self.column_indices[plot_col]
-
-# plt.subplot(3, 1, n+1)
-# plt.ylabel(f'{plot_col} [normed]')
-# plt.plot(self.input_indices, inputs[n, :, plot_col_index],label='Inputs', marker='.',zorder=-10)
-# plt.scatter(self.label_indices, labels[n, :, label_col_index],edgecolors='k', label='Labels', c='#2ca02c', s=20)
-# plt.scatter(self.label_indices, predictions[n, :, label_col_index], marker='X', edgecolors='none', label=f'Predictions(q={quantile})', s=15)
-# plt.legend()
-# plt.xlabel('Time [30m]')
-
-# WindowGenerator.quantile_plot = quantile_plot
-
-
-
-# w1.quantile_plot(model, quantile=q)
-
-# def quantile_plot(self, model=None, plot_col='TARGET', max_subplots=3, quantile=None):
-#       inputs, labels = self.example
-#   if quantile == 0.1:
-#     plt.figure(figsize=(12, 8))
-#   plot_col_index = self.column_indices[plot_col]
-#   max_n = min(max_subplots, len(inputs))
-#   for n in range(max_n):
-#     plt.subplot(3, 1, n+1)
-#     plt.ylabel(f'{plot_col} [normed]')
-#     if quantile == 0.1:
-#       plt.plot(self.input_indices, inputs[n, :, plot_col_index],
-#               label='Inputs', marker='.',zorder=-10)
-#     if self.label_columns:
-#       label_col_index = self.label_columns_indices.get(plot_col, None)
-#     else:
-#       label_col_index = plot_col_index
-#     if label_col_index is None:
-#       continue
-#     if quantile == 0.1:
-#       plt.scatter(self.label_indices, labels[n, :, label_col_index],
-#                 edgecolors='k', label='Labels', c='#2ca02c', s=20)
-#     if model is not None:
-#       predictions = model(inputs)
-#       plt.scatter(self.label_indices, predictions[n, :, label_col_index], marker='X', edgecolors='none', label=f'Predictions(q={quantile})', s=15)
-#     if quantile == 0.9 and n==0:
-#       plt.legend()
-#   plt.xlabel('Time [30m]')
-
-# WindowGenerator.quantile_plot = quantile_plot
+plt.grid(True)
+plt.show()

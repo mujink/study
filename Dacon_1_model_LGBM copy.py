@@ -3,6 +3,7 @@
 
 import pandas as pd
 import numpy as np
+from tensorflow.keras.callbacks import EarlyStopping,ModelCheckpoint,ReduceLROnPlateau
 
 #  이것들은 뭐하는 라이브러리 인지 모르겟음.
 
@@ -198,9 +199,10 @@ quantiles = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
 # 모델 인듯
 # 사이킷런의 에이피아이라고 함 라이트쥐비엠의 회귀모델임.
-from lightgbm import LGBMRegressor #다운 받아야할 듯 이놈만 일단 해결해본다.
+from lightgbm import LGBMRegressor, callback #다운 받아야할 듯 이놈만 일단 해결해본다.
 
-
+import inspect
+print(inspect.getfile(LGBMRegressor))
 # Get the model and the predictions in (a) - (b)
 # 예측 모델을 때마다 불러와서 쓸 모양임.
 def LGBM(q, X_train, Y_train, X_valid, Y_valid, X_test):
@@ -215,13 +217,21 @@ def LGBM(q, X_train, Y_train, X_valid, Y_valid, X_test):
     # 아직 모르겠음 나중에 볼래===============================================================================표시
     # objective='quantile' 퀀타일 로스의 를 오브젝티브 메소드에서 지원함
     # alpha=q 분위수를 입력함
+
+
     model = LGBMRegressor(objective='quantile', alpha=q,
-                         n_estimators=10000, bagging_fraction=0.7, learning_rate=0.027, subsample=0.7)                   
-                         
+                         n_estimators=10000, bagging_fraction=0.7, learning_rate=0.011, subsample=0.7)                   
+
+    modelpath = {"x":"../data/h5/LGBM_soler_cabk.hdf5"}
+    
+    es = callback.early_stopping(100, first_metric_only=True, verbose=True)
+    cp = callback.record_evaluation(modelpath)
+    # rl = callback.reset_parameter(half = [0.0135])
+    # 안되면 일단 보류 
     # 함수안에는 모델 구성이랑  이벨류 메트릭, 셋 얼리스탑 랜덤, 벌보스 500
     # 아직 모르겠음 나중에 볼래===============================================================================표시
     # 평가 값을 퀀타일 로스로 확인함 테스트를 이벨류 셋으로 넣고 얼리스탑
-    model.fit(X_train, Y_train, eval_metric = ['quantile'], 
+    model.fit(X_train, Y_train, eval_metric = ['quantile'], callbacks=[es,cp],
           eval_set=[(X_valid, Y_valid)], early_stopping_rounds=300, verbose=500)
 
     # (b) Predictions
@@ -302,25 +312,7 @@ print(submission.iloc[:48])
 print(submission.iloc[48:96])
 
 # 만족하고 저장
-submission.to_csv('../data/csv/submission_v5_lgbm.csv', index=False)
-
-# submission_v5_lgbm_500147
-# 이슬점, 일사량 함수 안쓴거
-# 2.0202123047
-
-# submission_v5_lgbm_500193
-# 이슬점, 일사량 함수 쓴거
-# 1.9973118521
-
-# scaler = MinMaxScaler() 
-# 분포표 출력시 0~1 사이값이라  크게 변하는거 없음
-# 데이콘에 파일 밀어 넣어보고 뭐가 좋은지 보려함
-# submission_v5_lgbm_500200
-# 2.0045336305	
+submission.to_csv('../data/csv/submission_v5_lgbm_calbak3.csv', index=False)
 
 
-# scaler = StandardScaler() 
-# 다음은 이거 오늘은 못할듯 제출 다함
-
-
-# 그다음은 러닝레이트 조정하는 콜백 넣을거임
+# 러닝레이트 조정하는 콜백 넣을거임

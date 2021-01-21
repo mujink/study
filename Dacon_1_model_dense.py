@@ -61,7 +61,7 @@ from tensorflow.keras.optimizers import RMSprop, SGD, Nadam
 # optimizer = Adam(lr=0.01)
 # loss :  0.009967544116079807 y_pred :  [[11.189517]]
 
-# optimizer = Adam(lr=0.001)
+optimizer = Adam(lr=0.0005)
 # loss :  7.157154729986459e-11 y_pred :  [[11.000016]]
 
 # optimizer = Adam(lr=0.0001)
@@ -134,14 +134,14 @@ from tensorflow.keras.optimizers import RMSprop, SGD, Nadam
 # optimizer = Nadam(lr=0.001)
 # loss :  2.149036591042597e-12 y_pred :  [[11.000001]] 
 
-optimizer = Nadam(lr=0.0001)
+# optimizer = Nadam(lr=0.0001)
 # loss :  5.9579133449005894e-06 y_pred :  [[10.995723]]
 # ============================================================
 
 
 
 # 모델===============================================================================
-
+# def model() :
 input1 = Input(shape=(x_train.shape[1]))
 output1 = Dense(256, activation= 'relu')(input1)
 output1 = Dense(128, activation= 'relu')(output1)
@@ -150,20 +150,38 @@ output1 = Dense(16, activation= 'relu')(output1)
 output1 = Dense(8, activation= 'relu')(output1)
 output1 = Dense(2, activation= 'relu')(output1)
 
-# 2.6 def Model1,2
+    # 2.6 def Model1,2
 model = Model(inputs=input1, outputs=output1)
 model.summary()
 
+import tensorflow.keras.backend as K
+
+def quantile_loss(q, y_true, y_pred):
+    err = (y_true - y_pred)
+    return K.mean(K.maximum(q*err, (q-1)*err), axis=-1)
+
 # # # 콜백 ===============================================================================
 modelpath = "../data/h5/Dacon_soler_cell.hdf5"
-es = EarlyStopping(monitor = 'val_loss',patience=100, mode="min")
-cp = ModelCheckpoint(monitor = 'val_loss',filepath = modelpath, save_best_only=True, mode='min')
-reduce_lr = ReduceLROnPlateau(monitor='val_loss',patience=50, factor=0.5, verbose=1)
-model = load_model("../data/h5/Dacon_soler_cell.hdf5")
-# model.compile(loss = 'mse',optimizer = optimizer, metrics=['mae'])
-hist = model.fit (x_train, y_train,  epochs= 10000, batch_size=128, verbose=1, validation_data=(x_val , y_val),callbacks=[es,cp,reduce_lr], shuffle=False)
+es = EarlyStopping(monitor = 'loss',patience=100, mode="min")
+cp = ModelCheckpoint(monitor = 'loss',filepath = modelpath, save_best_only=True, mode='min')
+# reduce_lr = ReduceLROnPlateau(monitor='loss',patience=10, factor=0.3, verbose=1)
 
 
+fitset = pd.read_csv('../data/csv/Dacon/preprocess_csv/TestDbSet2.csv', encoding='ms949', index_col=0)
+submission = pd.read_csv('../data/csv/Dacon/sample_submission.csv')
+
+q = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
+for j in q:
+    # model = model()
+    # model = load_model("../data/h5/Dacon_soler_cell.hdf5")
+    model.compile(loss = lambda y_true,y_pred: quantile_loss(j,y_true,y_pred), optimizer = optimizer, metrics=['mae'])
+    hist = model.fit (x_train, y_train,  epochs= 10000, batch_size=128, verbose=1, validation_data=(x_val , y_val),callbacks=[es,cp], shuffle=False)
+    temp = model.predict(fitset)
+    col = 'q_' + str(j)
+    submission.loc[submission.id.str.contains("Day7"),col] = temp[:,0]
+    submission.loc[submission.id.str.contains("Day8"),col] = temp[:,1]
+
+submission.to_csv('../data/csv/submission_v4_2.csv', index=False)
 
 #  모델 불러오기
 # model = load_model('../data/h5/Dacon_soler_cell.hdf5')
@@ -173,20 +191,20 @@ print("loss : ",loss)
 
 y_predict = model.predict(x_test)
 
-print(y_test.shape)
-print(y_predict.shape)
+# print(y_test.shape)
+# print(y_predict.shape)
 R2 = r2_score(y_test, y_predict)
 print("R2 : ", R2)
 
-print(y_predict)
-print(type(y_predict))
-y_predict = pd.DataFrame(y_predict)
-y_predict.to_csv('../data/csv/submission_v3.csv', index=False)
+# print(y_predict)
+# print(type(y_predict))
+# y_predict = pd.DataFrame(y_predict)
+# y_predict.to_csv('../data/csv/submission_v3.csv', index=False)
 
-plt.figure(figsize=(9,3.7))
-plt.subplot(2,1,1)
-plt.plot(y_predict, label='y_predict')
-plt.legend()
+# plt.figure(figsize=(9,3.7))
+# plt.subplot(2,1,1)
+# plt.plot(y_predict, label='y_predict')
+# plt.legend()
 
 
 

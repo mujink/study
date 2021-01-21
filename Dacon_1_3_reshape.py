@@ -22,8 +22,8 @@ plt.show()
 
 
 seq = np.array(fitset)
-x = seq[:,0:6]
-y = seq[:,6:]
+x = seq[:,0:-2]
+y = seq[:,-2:]
 
 print(x.shape)
 print(y.shape)
