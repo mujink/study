@@ -62,8 +62,6 @@ for j in quantiles1 :
 
 submission.to_csv('../data/csv/submission_v4.csv', index=False)
 
-#  엥 로스 어디까지 떨어지는거야
-
 
 """
 from lightgbm import LGBMRegressor

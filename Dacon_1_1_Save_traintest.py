@@ -31,7 +31,6 @@ def preprocess_data(data, is_train=True):
         temp['Target1'] = temp['TARGET'].shift(-48).fillna(method='ffill')
         temp['Target2'] = temp['TARGET'].shift(-48*2).fillna(method='ffill')
         temp = temp.dropna()
-        
         return temp.iloc[:-96]
 
     elif is_train==False:

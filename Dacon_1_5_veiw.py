@@ -1,15 +1,15 @@
 import pandas as pd
 import numpy as np
 # ================================
-# test = pd.read_csv('../data/csv/Dacon/preprocess_csv/TrainDbSet2.csv')
+# i = 0
+# test = pd.read_csv('../data/csv/Dacon/train/train.csv')
 # ranges = 336
 # hours = range(ranges)
 
+# test = test.iloc[range*(i):range*(i+1)]
+
 # #  Hour       GHI      T-Td        Td    TARGET       DHI       DNI        WS        RH         T   Target1   Target2
-# # Hour = test['Hour'].values
-
-# test = test.iloc[:336]
-
+# Hour = test['Hour'].values
 # GHI = test['GHI'].values
 # T_Td = test['T-Td'].values
 # Td = test['Td'].values
@@ -37,16 +37,18 @@ import numpy as np
 
 
 # import matplotlib.pyplot as plt
-# plt.figure(figsize=(18,2.5))
+# plt.figure(figsize=(18,8))
 # plt.subplot(6,1,1)
 # # plt.plot(hours, Hour, color='red')
 # plt.plot(hours, GHI, color='green')
-# # plt.subplot(6,1,2)
+# plt.subplot(6,1,2)
+# plt.plot(hours, TARGET, color='blue')
 # # plt.plot(hours, T_Td, color='#ddff00')
-# # plt.subplot(6,1,3)
+# plt.subplot(6,1,3)
+# plt.plot(hours, TARGET1, color='#aacc00')
 # # plt.plot(hours, Td, color='#886611')
 # plt.subplot(6,1,4)
-# plt.plot(hours, TARGET, color='blue')
+# plt.plot(hours, TARGET2, color='#aaccff')
 # plt.subplot(6,1,5)
 # plt.plot(hours, DHI, color='#ffaacc')
 # plt.subplot(6,1,6)
@@ -59,12 +61,12 @@ import numpy as np
 
 # ================================
 
-submission_v4 = pd.read_csv('../data/csv/submission_v5_lgbm_500193.csv')
-# ?????
+submission_v4 = pd.read_csv('../data/csv/111.csv')
 
 ranges = 336
 hours = range(ranges)
-submission_v4 = submission_v4[ranges:ranges+ranges]
+i = 3
+submission_v4 = submission_v4[ranges*(i):ranges*(i+1)]
 
 q_01 = submission_v4['q_0.1'].values
 q_02 = submission_v4['q_0.2'].values
@@ -75,11 +77,6 @@ q_06 = submission_v4['q_0.6'].values
 q_07 = submission_v4['q_0.7'].values
 q_08 = submission_v4['q_0.8'].values
 q_09 = submission_v4['q_0.9'].values
-
-# q_02 = q_02[ranges:ranges+ranges]
-
-
-# print(submission[0])
 
 import matplotlib.pyplot as plt
 plt.figure(figsize=(18,2.5))

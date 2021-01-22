@@ -117,45 +117,55 @@ TrainDbSet = Add_features(TrainDbSet)
 TestDbSet = Add_features(TestDbSet)
 
 # 드롭 안한게 더 잘나왔음 2
+#  Hour       GHI      T-Td        Td    TARGET       DHI       DNI        WS        RH         T   Target1   Target2
 del TrainDbSet['Hour']
-del TrainDbSet['T']
-del TrainDbSet['Td']
-del TrainDbSet['T-Td']
+# # del TrainDbSet['T']
+# # del TrainDbSet['Td']
+# # del TrainDbSet['T-Td']
 del TrainDbSet['WS']
 del TrainDbSet['RH']
 
 del TestDbSet['Hour']
-del TestDbSet['T']
-del TestDbSet['Td']
-del TestDbSet['T-Td']
+# # del TestDbSet['T']
+# # del TestDbSet['Td']
+# # del TestDbSet['T-Td']
 del TestDbSet['WS']
 del TestDbSet['RH']
 
-TrainDbSet.to_numpy()
-print(TrainDbSet.shape)
-print(TrainDbSet)
-
-print(TestDbSet.duplicated().sum())
-
-
+# TrainDbSet.to_numpy()
+# print(TrainDbSet.shape)
+# print(TrainDbSet)
 
 
 TrainDbSet.to_csv('../data/csv/Dacon/preprocess_csv/TrainDbSet2.csv', encoding='ms949', sep=",")
 TestDbSet.to_csv('../data/csv/Dacon/preprocess_csv/TestDbSet2.csv', encoding='ms949', sep=",")
-# codacdbset.to_csv('../data/csv/codac150_dc.csv', encoding='ms949', sep=",")
 
-TrainDbSet.to_numpy()
-print(TrainDbSet.shape)
+# TrainDbSet.to_numpy()
+# print(TrainDbSet.shape)
 
-print(TrainDbSet.corr())
-sns.set(font_scale=0.7)
-sns.heatmap(data=TrainDbSet.corr(), square=True, annot=True, cbar=True)
-plt.show()
+# print(TrainDbSet.corr())
+# sns.set(font_scale=0.7)
+# sns.heatmap(data=TrainDbSet.corr(), square=True, annot=True, cbar=True)
+# plt.show()
 
-print(TestDbSet.corr())
-sns.set(font_scale=0.7)
-sns.heatmap(data=TestDbSet.corr(), square=True, annot=True, cbar=True)
-plt.show()
+# print(TestDbSet.corr())
+# sns.set(font_scale=0.7)
+# sns.heatmap(data=TestDbSet.corr(), square=True, annot=True, cbar=True)
+# plt.show()
+
+
+# print(TrainDbSet.notnull().sum())
+# print(TestDbSet.notnull().sum())
+# print(TrainDbSet.duplicated().sum())
+
+print(TrainDbSet.duplicated())
+print(TrainDbSet[TrainDbSet.duplicated()])
+print(TestDbSet.duplicated().sum())
+print(TestDbSet[TestDbSet.duplicated()])
+
+# print(TestDbSet)
+
+
 # print(TrainSet2.corr())
 # sns.set(font_scale=0.7)
 # sns.heatmap(data=TrainSet2.corr(), square=True, annot=True, cbar=True)
