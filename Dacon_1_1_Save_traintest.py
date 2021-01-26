@@ -15,16 +15,30 @@
 """
 
 import pandas as pd
+import numpy as np
 
 
 File = 81
 df_test = []
 
 # 함수 정의
+def Add_features(data):
+    c = 243.12
+    b = 17.62
+    gamma = (b * (data['T']) / (c + (data['T']))) + np.log(data['RH'] / 100)
+    dp = ( c * gamma) / (b - gamma)
+    data.insert(1,'Td',dp)
+    data.insert(1,'T-Td',data['T']-data['Td'])
+    data['cos'] = np.cos(np.pi/2 - np.abs(data['Hour']%12 - 6)/6*np.pi/2)
+    data.insert(1,'GHI',data['DNI']*data['cos']+data['DHI'])
+    data.drop(['cos'], axis= 1, inplace = True)
+    data.insert(1,"Hour_Minute",data["Hour"] * 2 + data["Minute"] // 30)
+    return data
+
 def preprocess_data(data, is_train=True):
-    
+    data = Add_features(data)
     temp = data.copy()
-    temp = temp[['Hour', 'TARGET', 'DHI', 'DNI', 'WS', 'RH', 'T']]
+    temp = temp[['Hour_Minute', 'GHI', 'Hour','Td','T-Td', 'TARGET', 'DHI', 'DNI', 'WS', 'RH', 'T']]
 
     if is_train==True:          
     
@@ -34,7 +48,9 @@ def preprocess_data(data, is_train=True):
         return temp.iloc[:-96]
 
     elif is_train==False:
-        temp = temp[['Hour', 'TARGET', 'DHI', 'DNI', 'WS', 'RH', 'T']]
+        
+        temp = temp[['Hour_Minute', 'GHI', 'Hour','Td','T-Td', 'TARGET', 'DHI', 'DNI', 'WS', 'RH', 'T']]
+
         return temp.iloc[-48:, :]
 
 

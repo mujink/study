@@ -6,7 +6,7 @@ import numpy as np
 # ranges = 336
 # hours = range(ranges)
 
-# test = test.iloc[range*(i):range*(i+1)]
+# test = test.iloc[ranges*(i):ranges*(i+1)]
 
 # #  Hour       GHI      T-Td        Td    TARGET       DHI       DNI        WS        RH         T   Target1   Target2
 # Hour = test['Hour'].values
@@ -60,12 +60,12 @@ import numpy as np
 # plt.show()
 
 # ================================
-
-submission_v4 = pd.read_csv('../data/csv/111.csv')
+#  나쁘지 않아!!
+submission_v4 = pd.read_csv('../data/csv/submission_v4_2.csv')
 
 ranges = 336
 hours = range(ranges)
-i = 3
+i = 6
 submission_v4 = submission_v4[ranges*(i):ranges*(i+1)]
 
 q_01 = submission_v4['q_0.1'].values
@@ -82,14 +82,14 @@ import matplotlib.pyplot as plt
 plt.figure(figsize=(18,2.5))
 plt.subplot(1,1,1)
 plt.plot(hours, q_01, color='red')
-plt.plot(hours, q_02, color='#aa00cc')
-plt.plot(hours, q_03, color='#00ccaa')
-plt.plot(hours, q_04, color='#ccaa00')
-plt.plot(hours, q_05, color='#00aacc')
-plt.plot(hours, q_06, color='#aacc00')
-plt.plot(hours, q_07, color='#cc00aa')
-plt.plot(hours, q_08, color='#000000')
-plt.plot(hours, q_09, color='blue')
+plt.plot(hours, q_02, color='orange')
+plt.plot(hours, q_03, color='yellow')
+plt.plot(hours, q_04, color='green')
+plt.plot(hours, q_05, color='blue')
+plt.plot(hours, q_06, color='indigo')
+plt.plot(hours, q_07, color='purple')
+plt.plot(hours, q_08, color='black')
+plt.plot(hours, q_09, color='brown')
 plt.legend()
 plt.grid(True)
 plt.show()

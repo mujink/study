@@ -106,6 +106,7 @@ def Add_features(data):
     data['cos'] = np.cos(np.pi/2 - np.abs(data['Hour']%12 - 6)/6*np.pi/2)
     data.insert(1,'GHI',data['DNI']*data['cos']+data['DHI'])
     data.drop(['cos'], axis= 1, inplace = True)
+    data.insert(1,"Hour_Minute",data["Hour"] * 2 + data["Minute"] // 30)
     return data
 # ====== 파일 로드 ================================================================================================================================
 
@@ -113,24 +114,24 @@ TrainDbSet = pd.read_csv('../data/csv/Dacon/preprocess_csv/TrainDbSet.csv',encod
 TestDbSet = pd.read_csv('../data/csv/Dacon/preprocess_csv/TestDbSet.csv',encoding='ms949', index_col=0)
 
 
-TrainDbSet = Add_features(TrainDbSet)
-TestDbSet = Add_features(TestDbSet)
 
 # 드롭 안한게 더 잘나왔음 2
 #  Hour       GHI      T-Td        Td    TARGET       DHI       DNI        WS        RH         T   Target1   Target2
-del TrainDbSet['Hour']
-# # del TrainDbSet['T']
-# # del TrainDbSet['Td']
-# # del TrainDbSet['T-Td']
-del TrainDbSet['WS']
-del TrainDbSet['RH']
+# del TrainDbSet['Hour']
+# del TrainDbSet['T']
+# del TrainDbSet['Td']
+# del TrainDbSet['T-Td']
+# del TrainDbSet['WS']
+# del TrainDbSet['RH']
+del TrainDbSet['Hour_Minute']
 
-del TestDbSet['Hour']
-# # del TestDbSet['T']
-# # del TestDbSet['Td']
-# # del TestDbSet['T-Td']
-del TestDbSet['WS']
-del TestDbSet['RH']
+# del TestDbSet['Hour']
+# del TestDbSet['T']
+# del TestDbSet['Td']
+# del TestDbSet['T-Td']
+# del TestDbSet['WS']
+# del TestDbSet['RH']
+del TestDbSet['Hour_Minute']
 
 # TrainDbSet.to_numpy()
 # print(TrainDbSet.shape)

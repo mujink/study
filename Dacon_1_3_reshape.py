@@ -52,30 +52,42 @@ def split_x(data,timestep):
     return(np.array(x))
 
 xt = split_x(prdset,1)
+# xt = split_x(prdset,1)
 
-# x = x.reshape(-1,48,7)
-# y = y.reshape(-1,2)
-# xt = xt.reshape(-1,1,7)
+# x = x.reshape(-1,7,1)
+# y1 = y1.reshape(-1,1)
+# y2 = y2.reshape(-1,1)
+# xt = xt.reshape(-1,7,1)
+
+# x = x.reshape(-1,24,2,10).astype('float32')
+# y1 = y1.reshape(-1,48,2).astype('float32')
+# y2 = y2.reshape(-1,48,2).astype('float32')
+
 print(x.shape)
 print(y1.shape)
 print(y2.shape)
 print(xt.shape)
-
-
+# x = np.transpose(x)
+# y1 = np.transpose(y1)
+# y2 = np.transpose(y2)
+# print(x.shape)
+# print(y1.shape)
+# print(y2.shape)
 # # #  넘파이 저장=======================================================
 
 
 np.save('../data/csv/Dacon/np/TrainDb_X.npy',x)
 np.save('../data/csv/Dacon/np/TrainDb_Y1.npy',y1)
 np.save('../data/csv/Dacon/np/TrainDb_Y2.npy',y2)
-np.save('../data/csv/Dacon/np/prdDb_X.npy',xt)
+np.save('../data/csv/Dacon/np/prdDb_Xt.npy',xt)
 
 # # #  넘파이 불러오기=======================================================
 
 # x = np.load('../data/csv/Dacon/np/TrainDb_X.npy',allow_pickle=True)
 # y = np.load('../data/csv/Dacon/np/TrainDb_Y.npy',allow_pickle=True)
+# xt = np.load(../data/csv/Dacon/np/prdDb_Xt.npy'',allow_pickle=True)
 
-# # #  넘파이 불러오기=======================================================
+# # # 샘플 보기=======================================================
 
 # x = pd.DataFrame(x[1])
 # y = pd.DataFrame(y[1])

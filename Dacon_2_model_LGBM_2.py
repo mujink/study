@@ -1,6 +1,10 @@
 # Dense 모델이 더 잘나왔음
 # Dacon_1_model_dense
 
+"""
+Dacon_2_model_LGBM 베이스에서 트레인의 컬럼 값을 수정함.
+별 차이 없거나 떨어짐.
+"""
 
 
 import pandas as pd
@@ -61,7 +65,7 @@ def preprocess_data(data, is_train=True):
     temp = data.copy()
     
     # 템프는 아래 컬럼의 제외한 나머지 컬럼을 버림
-    temp = temp[['Hour', 'TARGET', 'DHI', 'DNI', 'WS', 'RH', 'T']]
+    temp = temp[['Day', 'Minute', 'Hour', 'TARGET', 'DHI', 'DNI', 'WS', 'RH', 'T']]
 
     #  만약 잇 트레인의 값이 트루일 때
     if is_train==True:          
@@ -82,7 +86,7 @@ def preprocess_data(data, is_train=True):
     elif is_train==False:
         
         # 위에서 컬럼 버린 걸 또 확인하고 (왜지??)
-        temp = temp[['Hour', 'TARGET', 'DHI', 'DNI', 'WS', 'RH', 'T']]
+        temp = temp[['Day', 'Minute', 'Hour', 'TARGET', 'DHI', 'DNI', 'WS', 'RH', 'T']]
                               
         # 맨 밑줄 부터 하루치 행을 함수가 호출된 위치에 반환하고 함수가 종료됨.
         return temp.iloc[-48:, :]
@@ -143,7 +147,30 @@ print(df_train.head())
 
 print(df_train.iloc[-48:])
 
+"""
+여기서 셋의 컬럼을 자르고 구성함
+"""
+# del df_train['Hour']
+# del df_train['T']
+# del df_train['Td']
+# del df_train['T-Td']
+# del df_train['WS']
+# del df_train['RH']
+# del df_train['DNI']
+# del df_train['DHI']
+# del df_train['TARGET']
+# del df_train['GHI']
 
+# del X_test['Hour']
+# del X_test['T']
+# del X_test['Td']
+# del X_test['T-Td']
+# del X_test['WS']
+# del X_test['RH']
+# del X_test['DNI']
+# del X_test['DHI']
+# del X_test['TARGET']
+# del X_test['GHI']
 
 # 스플릿함
 # 위에서 전처리한 엑스 트레인만 가지고 길이를 바꿔서 패밀리 1, 2를 만듬.

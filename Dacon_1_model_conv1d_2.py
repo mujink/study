@@ -4,7 +4,7 @@ import pandas as pd
 
 from tensorflow.keras.callbacks import EarlyStopping,ModelCheckpoint,ReduceLROnPlateau
 from tensorflow.keras.models import Sequential, load_model, Model
-from tensorflow.keras.layers import Dense,LSTM,Conv1D,MaxPool1D,Dropout,Flatten, Input , Activation, Reshape, Lambda
+from tensorflow.keras.layers import Dense,LSTM,Conv1D,Conv2D,MaxPool1D,MaxPool2D,Dropout,Flatten, Input , Activation, Reshape, Lambda
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
@@ -33,9 +33,8 @@ print(y2.shape)
 (1093, 48, 2)
 """
 # train_test_split ==========================================================================================
-from sklearn.model_selection import train_test_split
 
-x_train, x_val, y1_train, y1_val, y2_train, y2_val = train_test_split(x, y1 ,y2, train_size = 0.8, shuffle = False)#, random_state=1)
+x_train, x_val, y1_train, y1_val, y2_train, y2_val = train_test_split(x, y1 ,y2, train_size = 0.8, shuffle = True)#, random_state=1)
 print("# shape  test=====================================================================================================")
 print(x_train.shape)
 print(x_val.shape)
@@ -146,43 +145,40 @@ from tensorflow.keras.optimizers import RMSprop, SGD, Nadam
 
 # 모델===============================================================================
 def model1() :
-
-    input1 = Input(shape=(x_train.shape[1],x_train.shape[2]))
-    con1 = Conv1D(256,2,padding='same', activation='relu')(input1)
-    # MxP1 = MaxPool1D(pool_size=(2))(con1)
-    con1 = Conv1D(128,2,padding='same', activation='relu')(con1)
-    # MxP1 = MaxPool1D(pool_size=(2))(con1)
-    con1 = Conv1D(64,2,padding='same', activation='relu')(con1)
-    con1 = Conv1D(32,2,padding='same', activation='relu')(con1)
-    # MxP1 = MaxPool1D(pool_size=(2))(con1)
-    # con1 = Conv1D(16,2,padding='same', activation='relu')(MxP1)
-    # MxP1 = MaxPool1D(pool_size=(2))(con1)
-    output1 = Flatten()(con1)
-    output1 = Dense(256, activation= 'relu')(output1)
-    output1 = Dense(128, activation= 'relu')(output1)
-    output1 = Dense(64, activation= 'relu')(output1)
-    output1 = Dense(32, activation= 'relu')(output1)
-    output1 = Dense(16, activation= 'relu')(output1)
-    output1 = Dense(8, activation= 'relu')(output1)
-    output1 = Dense(4, activation= 'relu')(output1)
-    output1 = Dense(1, activation= 'relu')(output1)
-
-    # 2.6 def Model1,2
-    model = Model(inputs=input1, outputs=output1)
+    model = Sequential()
+    model.add(Conv1D(256,2,padding='same', activation='relu', input_shape=(x_train.shape[1],x_train.shape[2])))
+    model.add(Conv1D(128,2,padding='same', activation='relu'))
+    model.add(Conv1D(64,2,padding='same', activation='relu'))
+    model.add(Conv1D(32,2,padding='same', activation='relu'))
+    model.add(Flatten())
+    model.add(Dense(256, activation= 'relu'))
+    model.add(Dense(128, activation= 'relu'))
+    model.add(Dense(64, activation= 'relu'))
+    model.add(Dense(32, activation= 'relu'))
+    model.add(Dense(16, activation= 'relu'))
+    model.add(Dense(8, activation= 'relu'))
+    model.add(Dense(4, activation= 'relu'))
+    model.add(Dense(1, activation= 'relu'))
     model.summary()
     return model
 
+# 퀀타일 로스 ============================================================================
 import tensorflow.keras.backend as K
 
 def quantile_loss(q, y_true, y_pred):
     err = (y_true - y_pred)
     return K.mean(K.maximum(q*err, (q-1)*err), axis=-1)
 
+import tensorflow as tf
+
+def quantile_loss2(y_true, y_pred):
+    qs = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
+    q = tf.constant(np.array([qs]), dtype=tf.float32)
+    e = y_true - y_pred
+    v = tf.maximum(q*e, (q-1)*e)
+    return K.mean(v)
 # # # 콜백 ===============================================================================
-modelpath = "../data/h5/Dacon_soler_cell.hdf5"
-es = EarlyStopping(monitor = 'val_loss',patience=30, mode="min")
-cp = ModelCheckpoint(monitor = 'val_loss',filepath = modelpath, save_best_only=True, mode='min')
-# reduce_lr = ReduceLROnPlateau(monitor='loss',patience=15, factor=0.9, verbose=1)
+
 
 
 # fitset = pd.read_csv('../data/csv/Dacon/preprocess_csv/TestDbSet2.csv', encoding='ms949', index_col=0)
@@ -192,64 +188,123 @@ print(fitset.shape)
 submission = pd.read_csv('../data/csv/Dacon/sample_submission.csv')
 
 model = model1()
-# model = load_model('../data/h5/Dacon_soler_cell.hdf5')
+# model = load_model('../data/csv/Dacon/hdf5/Dacon_soler_cell_q0_"+ str(j) +"_x1.hdf5')
 
 
 # 다음날 , 다 다음날 의 예상 치를 각각 핏함
 # 분위수 별로 로스를 줄이기...
-# 옵티마이저 값은 초기값에 따라 러닝레이트가 줄어들어도 실제 로스값에 변화가 없는 경우가 있음
-# 따라서 각 퀀타일별 옵티마이저 값을 조정해서 줄이는 방법 밖에 없다고 봄.
 # 2일치씩 10분위로 하여 각각 하이퍼 파라미터를 조정하여야함
-q = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
-for j in q:
-    optimizer = Adam(lr=0.0016)
-    model.compile(loss = lambda y_true,y_pred: quantile_loss(j,y_true,y_pred), optimizer = optimizer)
-    hist = model.fit (x_train, y1_train,  epochs= 10000, batch_size=256, verbose=1, validation_data=(x_val , y1_val),callbacks=[es,cp], shuffle=False)
-    temp = model.predict(fitset)
-    col = 'q_' + str(j)
-    print(temp.shape)
-    print(temp)
-
-    # temp = temp.reshape(temp.shape[0]*temp.shape[1],temp.shape[2])
-    submission.loc[submission.id.str.contains("Day7"),col] = temp[:,0]
-    temp =[0]
-
-submission.to_csv('../data/csv/submission_v4_con1d3Test.csv', index=False)
-submission = pd.read_csv('../data/csv/submission_v4_con1d3Test.csv')
+# 포문 안에 모델 세이브와 로드를 넣어 가중치를 업데이트 하는 방식으로 로스를 줄여봄
+# 람다 함수 때문에 로드가 되지않음.
+# 로드한 모델의 람다 함수를 찾을 수 없음 따로 파일을 생성해서 저장해야하는 것으로보임.
+# 람다 함수로 넣지 않고 시도해봄 안됨.
+# mse로 로스 줄여놓고 결과봄. 괜찮으면 서브미션 파일 생성할 때만 평가 진행함
+# 결과확인
 
 q = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
+# q = [0.1]
+
 for j in q:
-    optimizer = Adam(lr=0.0016)
-    model.compile(loss = lambda y_true,y_pred: quantile_loss(j,y_true,y_pred), optimizer = optimizer)
-    hist = model.fit (x_train, y2_train,  epochs= 10000, batch_size=256, verbose=1, validation_data=(x_val , y2_val),callbacks=[es,cp], shuffle=False)
-    temp = model.predict(fitset)
-    col = 'q_' + str(j)
+    # model = load_model("../data/csv/Dacon/hdf5/Dacon_soler_cell_q0_"+ str(j) +"_x1.hdf5")
+
+    modelpath1 = "../data/csv/Dacon/hdf5/Dacon_soler_cell_q0_"+ str(j) +"_x1.hdf5"
+    es1 = EarlyStopping(monitor = 'val_loss',patience=50, mode="min")
+    cp1 = ModelCheckpoint(monitor = 'val_loss',filepath = modelpath1, save_best_only=True, mode='min')
+    reduce_lr1 = ReduceLROnPlateau(monitor='loss',patience=10, factor=0.7, verbose=1)
+
+    optimizer = Adam(lr=0.002)
+    optimizer1 = "adam"
+
+    # model.compile(loss = "mse", optimizer = optimizer1)    
+    model.compile(loss = lambda y_true,y_pred: quantile_loss(j,y_true,y_pred), optimizer = optimizer)    
+    hist = model.fit (x_train, y1_train,  epochs= 1000, batch_size=1024, verbose=1, validation_data=(x_val , y1_val),callbacks=[cp1,es1,reduce_lr1], shuffle=True)
+    temp = model.predict(fitset).round(2)
+    col1 = 'q_' + str(j)
     print(temp.shape)
     print(temp)
     # temp = temp.reshape(temp.shape[0]*temp.shape[1],temp.shape[2])
-    submission.loc[submission.id.str.contains("Day8"),col] = temp[:,1]
+
+    submission.loc[submission.id.str.contains("Day7"),col1] = temp[:,0]
     temp =[0]
 
-submission.to_csv('../data/csv/submission_v4_con1d3Test.csv', index=False)
+# submission.to_csv('../data/csv/submission_v4_con1d4Test.csv', index=False)
+# submission = pd.read_csv('../data/csv/submission_v4_con1d4Test.csv')
+
+for j in q:
+    # model = load_model("../data/csv/Dacon/hdf5/Dacon_soler_cell_q0_"+ str(j) +"_x2.hdf5")
+
+    modelpath2 = "../data/csv/Dacon/hdf5/Dacon_soler_cell_q0_"+ str(j) +"_x2.hdf5"
+    es2 = EarlyStopping(monitor = 'val_loss',patience=50, mode="min")
+    cp2 = ModelCheckpoint(monitor = 'val_loss',filepath = modelpath2, save_best_only=True, mode='min')
+    reduce_lr2 = ReduceLROnPlateau(monitor='loss',patience=10, factor=0.7, verbose=1)
+
+    optimizer = Adam(lr=0.002)
+    optimizer1 = "adam"
+
+    # model.compile(loss = "mse", optimizer = optimizer1 )    
+    model.compile(loss = lambda y_true,y_pred: quantile_loss(j,y_true,y_pred), optimizer = optimizer)
+    hist = model.fit (x_train, y2_train,  epochs= 1000, batch_size=1024, verbose=1, validation_data=(x_val , y2_val),callbacks=[cp2,es2,reduce_lr1], shuffle=True)
+    temp = model.predict(fitset).round(2)
+    col2 = 'q_' + str(j)
+    print(temp.shape)
+    print(temp)
+    # temp = temp.reshape(temp.shape[0]*temp.shape[1],temp.shape[2])
+    temp[temp<0] = 0
+
+    submission.loc[submission.id.str.contains("Day8"),col2] = temp[:,0]
+    temp =[0]
+
+submission.to_csv('../data/csv/submission_v4_con1d4Test.csv', index=False)
 
 """
-1.6026 
-2.9156 
-4.0400
-5.0128
-5.8656 
-6.6655
-7.3557
-7.9723
-8.4897
+1.4529
+2.3290
+2.7596
+2.8833
+2.7781
+2.5062
+2.0878
+1.5475
+0.8759
 
-1.6127
-2.9571
-4.0928
-5.0515
-5.8646
-6.6150
-7.2951
-7.9180
-8.4703
+1.4653
+2.4096
+2.9216
+3.0697
+2.9473
+2.6341
+2.1894
+1.6066
+0.9067
+
+큰 차이없음
+1.4214
+2.2239
+2.6119
+2.6630
+2.5241
+2.2378
+1.8197
+1.3015
+0.7470
+
+1.3964
+2.2243
+2.6067
+2.6673
+2.4960
+2.1947
+1.7732
+1.2704
+0.7140
+
+에코 높임 1000 얼리스탑 따위는 없음
+의미 없는 그냥 과적합임
+과적합 가즈아아아아 결과로 보고 판단해줌
+안 끝나니? 퇴근 안할꺼니?
+집에 보내줘. 구해줘. 구해줘 갇혓어
+
+과적합 폭망
+
+다시할거야
 """
