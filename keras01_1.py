@@ -18,6 +18,7 @@ model.add(Dense(3, activation='linear'))
 model.add(Dense(4))
 model.add(Dense(1))
 
+
 #3. 컴파일, 훈련
 from tensorflow.keras.optimizers import Adam, SGD
 # model.compile(loss='mse', optimizer=Adam(learning_rate=0.001))
