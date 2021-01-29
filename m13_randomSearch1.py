@@ -3,6 +3,7 @@
 #                   언제든지 중단할 수 있다.
 #                   중요한 파라미터 순서대로 찾아 고정하며 파라미터를 찾는다.
 # >> RandomizedSearchCV : 모든 파라미터를 건드릴 필요가 없다. 랜덤하게 더 많은 파라미터들을 확인한다. 속도가 빠르다.
+#                         n_estimators 디폴트 10
 
 import numpy as np
 from sklearn.datasets import load_iris

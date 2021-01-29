@@ -28,21 +28,9 @@ parameters = [
 
 # 모델, 파라미터, 교차검증
 model = GridSearchCV(SVC(), parameters, cv=kfold)
+score = cross_val_score(model, x_train, y_train, cv=kfold)
 
-import datetime
-
-start = datetime.datetime.now()
-model.fit(x_train,y_train)
-end = datetime.datetime.now()
-print("time", end-start)
-
-print(model.best_estimator_)
-
-y_pred = model.predict(x_test)
-print("최종 정답률 :", accuracy_score(y_test, y_pred))
-
-aaa =model.score(x_test,y_test)
-print("score", aaa)
+print("교차검증 점수", score)
 
 """
 time 0:00:00.088791

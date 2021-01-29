@@ -64,7 +64,7 @@ print("score", aaa)
 """
 time 0:00:00.088791
 SVC(C=1, kernel='linear')
-?? 1.0
+최종 정답률 : 1.0
 score 1.0
 
 time 0:00:03.252294
