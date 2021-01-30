@@ -1,6 +1,9 @@
 # add..from sklearn.model_selection import KFold, cross_val_score
 # preprocessing.. spilt  => KFold
 # fit, evl => cross_val_score
+# cross_val_score는 k-fold 교차검증을 쉽게 사용하기 위한 함수입니다.
+# cross_val_score는 내부적을 StratifiedKFold 을 사용합니다.
+
 
 import numpy as np
 from sklearn.datasets import load_iris
@@ -32,11 +35,22 @@ print(y.shape)      #(150,3)
 
 #1.1 Data Preprocessing / KFold
 
-# data splits
+# n_splits 는 데이터 분할 수 입니다. 전체 데이터 수를 넘을 수 없습니다.
+# 트레인 테스트 5세트로 나눕니다.
+# shuffle은  매번 데이터를 분할하기전 섞을지 말지 여부를 선택합니다.
 kfold = KFold(n_splits=5, shuffle=True)
-# kfold.get_n_splits(x)
-# for train_index, test_index in kfold.split(x):
-#  print("TRAIN:", train_index, "TEST:", test_index)
+"""
+kfold.get_n_splits(x)
+
+for train_index, test_index in kfold.split(x):
+ print("TRAIN:", train_index.shape, "TEST:", test_index.shape)
+
+# TRAIN: (120,) TEST: (30,)
+# TRAIN: (120,) TEST: (30,)
+# TRAIN: (120,) TEST: (30,)
+# TRAIN: (120,) TEST: (30,)
+# TRAIN: (120,) TEST: (30,)
+"""
 """
 #  sklearn.onehotencoding
 
@@ -58,6 +72,8 @@ y = one.transform(y).toarray()      #. transform
 # model = RandomForestClassifier()
 model = LogisticRegression()
 
+# cross_val_score는 여러 파라미터를 받습니다.
+# cv 분할 데이터셋 교차검증할 갯수
 scores = cross_val_score(model, x, y, cv= kfold)
 print('scores : ', scores)
 

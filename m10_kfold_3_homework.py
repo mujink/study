@@ -37,7 +37,10 @@ print(y.shape)      #(150,3)
 
 
 kfold = KFold(n_splits=5, shuffle=True)
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.8, shuffle = True, random_state=1)
+
+kfold.get_n_splits(x)
+
+
 
 # kfold.get_n_splits(x)
 # for train_index, test_index in kfold.split(x):
@@ -49,62 +52,59 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.8, shuf
 # model = KNeighborsClassifier()
 # model = DecisionTreeClassifier()
 # model = RandomForestClassifier()
-model = LogisticRegression()
+# model = LogisticRegression()
 
-scores = cross_val_score(model, x_train, y_train, cv= kfold)
-print('scores : ', scores)
-
+models = [LinearSVC, SVC, KNeighborsClassifier, DecisionTreeClassifier, RandomForestClassifier, LogisticRegression]
+for model in models :
+    print(str(model))
+    model = model()
+    for train_index, test_index in kfold.split(x):
+        x_train, x_test = x[train_index], x[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        
+        x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, train_size = 0.8, shuffle = True, random_state=1)
+        model.fit( x_train, y_train)
+        result = model.score( x_test, y_test)
+        print(result)        
+        
 
 """
-model.fit(x_train,y_train)
-
-# 스코어와 프래딕트 평가 예측
-y_pred = model.predict(x_test)
-print(y_pred)
-print(y_train[-5:-1])
-
-
-result = model.score(x_test,y_test)
-print(result)
-
-acc = accuracy_score(y_test, y_pred)
-print("accuracy_score : ", acc)
-
-LinearSVC
+<class 'sklearn.svm._classes.LinearSVC'>
+0.9333333333333333
+0.9333333333333333
+0.9333333333333333
+0.9666666666666667
+0.9666666666666667
+<class 'sklearn.svm._classes.SVC'>
+0.9333333333333333
+0.9666666666666667
 0.9
-accuracy_score :  0.9
-scores :  [0.86666667 1.         1.         0.96666667 1.        ]
-scores :  [0.95833333 1.         0.875      0.95833333 1.        ]
-
-SVC
+0.9333333333333333
 0.9666666666666667
-accuracy_score :  0.9666666666666667
-scores :  [0.96666667 0.9        0.96666667 1.         0.96666667]
-scores :  [1.         1.         0.95833333 0.95833333 0.91666667]
-
-KNeighborsClassifier
+<class 'sklearn.neighbors._classification.KNeighborsClassifier'>
+0.9666666666666667
+0.9666666666666667
+0.9666666666666667
+0.9666666666666667
+0.9333333333333333
+<class 'sklearn.tree._classes.DecisionTreeClassifier'>
+0.9
+0.9333333333333333
+0.9333333333333333
+0.9666666666666667
+0.9333333333333333
+<class 'sklearn.ensemble._forest.RandomForestClassifier'>
+0.9666666666666667
+0.9
+0.9666666666666667
+0.9333333333333333
+0.9666666666666667
+<class 'sklearn.linear_model._logistic.LogisticRegression'>
+0.9666666666666667
+0.9333333333333333
+0.9666666666666667
+0.8666666666666667
 1.0
-accuracy_score :  1.0
-scores :  [0.96666667 0.96666667 0.96666667 0.93333333 1.        ]
-scores :  [0.91666667 0.91666667 1.         0.91666667 1.        ]
-
-DecisionTreeClassifier
-0.9666666666666667
-accuracy_score :  0.9666666666666667
-scores :  [0.96666667 0.93333333 0.96666667 0.96666667 0.86666667]
-scores :  [0.91666667 1.         0.875      0.95833333 0.79166667]
-
-RandomForestClassifier
-0.9666666666666667
-accuracy_score :  0.9666666666666667
-scores :  [0.93333333 0.96666667 1.         0.93333333 0.93333333]
-scores :  [1.         0.875      0.95833333 0.95833333 0.95833333]
-
-LogisticRegression
-0.9666666666666667
-accuracy_score :  0.9666666666666667
-scores :  [1.         1.         0.96666667 0.96666667 0.86666667]
-scores :  [0.95833333 0.95833333 1.         1.         0.91666667]
 """
 # Tensorflow
 # acc : 1.0

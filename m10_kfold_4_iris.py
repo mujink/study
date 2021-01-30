@@ -36,25 +36,80 @@ kfold = KFold(n_splits=5, shuffle=True)
 
 #2.model
 models = [LinearSVC, SVC, KNeighborsClassifier, DecisionTreeClassifier, RandomForestClassifier, LogisticRegression]
-
-for algorithm in models :
-    model = algorithm()
-    print(algorithm)
-    scores = cross_val_score(model, x_train, y_train, cv= kfold)
-    print('scores : ', scores)
+for train_index, test_index in kfold.split(x):
+    print("TRAIN:", train_index.shape, "TEST:", test_index.shape)
+    x_train, x_test = x[train_index], x[test_index]
+    y_train, y_test = y[train_index], y[test_index]
+    for algorithm in models :
+        model = algorithm()
+        print(algorithm)
+        scores = cross_val_score(model, x_train, y_train, cv= kfold)
+        print('scores : ', scores)
 
 
 """
 <class 'sklearn.svm._classes.LinearSVC'>
-scores :  [0.91666667 0.95833333 0.91666667 1.         0.95833333]
+scores :  [0.95833333 0.95833333 0.91666667 0.95833333 0.91666667]
 <class 'sklearn.svm._classes.SVC'>
-scores :  [0.91666667 1.         1.         1.         0.91666667]
+scores :  [1.         0.95833333 0.91666667 1.         1.        ]
 <class 'sklearn.neighbors._classification.KNeighborsClassifier'>
-scores :  [0.91666667 0.95833333 1.         1.         0.91666667]
+scores :  [0.91666667 0.875      0.95833333 0.875      1.        ]
 <class 'sklearn.tree._classes.DecisionTreeClassifier'>
-scores :  [0.95833333 0.95833333 0.875      0.95833333 1.        ]
+scores :  [0.91666667 0.95833333 0.83333333 1.         0.875     ]
 <class 'sklearn.ensemble._forest.RandomForestClassifier'>
-scores :  [0.95833333 0.95833333 0.95833333 0.91666667 1.        ]
+scores :  [0.875      0.91666667 1.         1.         0.875     ]
 <class 'sklearn.linear_model._logistic.LogisticRegression'>
-scores :  [1.         1.         0.95833333 0.91666667 0.95833333]
+scores :  [0.95833333 0.95833333 1.         0.95833333 0.875     ]
+TRAIN: (120,) TEST: (30,)
+<class 'sklearn.svm._classes.LinearSVC'>
+scores :  [0.91666667 0.95833333 1.         0.95833333 0.95833333]
+<class 'sklearn.svm._classes.SVC'>
+scores :  [0.95833333 0.875      0.91666667 1.         1.        ]
+<class 'sklearn.neighbors._classification.KNeighborsClassifier'>
+scores :  [0.91666667 0.875      1.         1.         1.        ]
+<class 'sklearn.tree._classes.DecisionTreeClassifier'>
+scores :  [1.         0.95833333 1.         0.95833333 0.91666667]
+<class 'sklearn.ensemble._forest.RandomForestClassifier'>
+scores :  [1.         0.95833333 0.95833333 0.91666667 1.        ]
+<class 'sklearn.linear_model._logistic.LogisticRegression'>
+scores :  [0.95833333 0.875      0.95833333 1.         0.95833333]
+TRAIN: (120,) TEST: (30,)
+<class 'sklearn.svm._classes.LinearSVC'>
+scores :  [0.95833333 0.91666667 1.         1.         1.        ]
+<class 'sklearn.svm._classes.SVC'>
+scores :  [0.95833333 1.         1.         0.91666667 1.        ]
+<class 'sklearn.neighbors._classification.KNeighborsClassifier'>
+scores :  [1.         1.         1.         0.95833333 1.        ]
+<class 'sklearn.tree._classes.DecisionTreeClassifier'>
+scores :  [0.95833333 0.91666667 1.         0.91666667 1.        ]
+<class 'sklearn.ensemble._forest.RandomForestClassifier'>
+scores :  [0.95833333 0.95833333 0.95833333 1.         0.95833333]
+<class 'sklearn.linear_model._logistic.LogisticRegression'>
+scores :  [0.95833333 1.         0.95833333 1.         1.        ]
+TRAIN: (120,) TEST: (30,)
+<class 'sklearn.svm._classes.LinearSVC'>
+scores :  [0.95833333 1.         0.95833333 0.91666667 0.95833333]
+<class 'sklearn.svm._classes.SVC'>
+scores :  [0.95833333 0.95833333 1.         0.95833333 1.        ]
+<class 'sklearn.neighbors._classification.KNeighborsClassifier'>
+scores :  [0.91666667 0.95833333 0.91666667 0.95833333 1.        ]
+<class 'sklearn.tree._classes.DecisionTreeClassifier'>
+scores :  [0.95833333 0.83333333 0.91666667 0.95833333 0.95833333]
+<class 'sklearn.ensemble._forest.RandomForestClassifier'>
+scores :  [0.95833333 0.95833333 1.         1.         0.91666667]
+<class 'sklearn.linear_model._logistic.LogisticRegression'>
+scores :  [1.         0.95833333 0.91666667 0.91666667 1.        ]
+TRAIN: (120,) TEST: (30,)
+<class 'sklearn.svm._classes.LinearSVC'>
+scores :  [0.95833333 0.91666667 0.95833333 0.875      1.        ]
+<class 'sklearn.svm._classes.SVC'>
+scores :  [1.         0.95833333 1.         0.95833333 0.95833333]
+<class 'sklearn.neighbors._classification.KNeighborsClassifier'>
+scores :  [1.         0.95833333 0.95833333 1.         0.91666667]
+<class 'sklearn.tree._classes.DecisionTreeClassifier'>
+scores :  [0.95833333 0.95833333 0.95833333 0.95833333 0.95833333]
+<class 'sklearn.ensemble._forest.RandomForestClassifier'>
+scores :  [0.95833333 1.         0.95833333 0.95833333 0.83333333]
+<class 'sklearn.linear_model._logistic.LogisticRegression'>
+scores :  [0.91666667 0.91666667 1.         0.91666667 0.95833333]
 """

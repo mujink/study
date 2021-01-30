@@ -36,12 +36,15 @@ kfold = KFold(n_splits=5, shuffle=True)
 
 #2.model
 models = [LinearSVC, SVC, KNeighborsClassifier, DecisionTreeClassifier, RandomForestClassifier, LogisticRegression]
-
-for algorithm in models :
-    model = algorithm()
-    print(algorithm)
-    scores = cross_val_score(model, x_train, y_train, cv= kfold)
-    print('scores : ', scores)
+for train_index, test_index in kfold.split(x):
+    print("TRAIN:", train_index.shape, "TEST:", test_index.shape)
+    x_train, x_test = x[train_index], x[test_index]
+    y_train, y_test = y[train_index], y[test_index]
+    for algorithm in models :
+        model = algorithm()
+        print(algorithm)
+        scores = cross_val_score(model, x_train, y_train, cv= kfold)
+        print('scores : ', scores)
 
 
 """
