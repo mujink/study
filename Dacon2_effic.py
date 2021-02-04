@@ -1,7 +1,7 @@
 # import os, sys
 # from google.colab import drive
 # drive.mount('/content/MyDrive')
-
+# 쓰지 말자 모르겠다.
 import tensorflow as tf
 import numpy as np
 import pandas as pd
@@ -25,7 +25,7 @@ x_train = train.drop(['id', 'digit', 'letter'], axis=1).values
 x_train = x_train.reshape(-1, 28, 28, 1)
 
 # 특성치를 앞에서 전처리에서 빼줌
-# 조건에 맞으면 0 틀리면 값을 그대로 둠
+# 조건에 맞으면 0 값으로 초기화 틀리면 값을 그대로 둠
 x_train = np.where((x_train<=20)&(x_train!=0) ,0.,x_train)
 
 x_train = x_train/255
@@ -58,7 +58,7 @@ from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
 from sklearn import metrics
 
 # 이미지 범핑 셋팅
-# 좌우 위아래 줌 회전 할거 다하고 발리데이션 스플릿
+# 좌우 위아래 줌 회전 하고 발리데이션 스플릿
 datagen = ImageDataGenerator(
         # featurewise_center=True,
         # featurewise_std_normalization=True,
@@ -90,7 +90,8 @@ valgen = ImageDataGenerator(
 from tensorflow.keras.callbacks import LearningRateScheduler
 from tensorflow.keras.callbacks import EarlyStopping
 def create_model() :
-    # 2020 년 말인가? 네트워크의 넓이 깊이 높이와 엑큐러시 관계에 대해 논문에 실린 이미지네트워크 모델임 
+    # 2020 년 말인가? 네트워크의 넓이 깊이 높이와 엑큐러시 관계에 대해 논문에 실린 이미지네트워크 모델임
+    # 
   effnet = tf.keras.applications.EfficientNetB3(
       include_top=True,
       weights=None,
