@@ -90,7 +90,8 @@ parameters = [
 model = GridSearchCV(XGBClassifier(n_jobs=-1,use_label_encoder=False), parameters)
 
 model.fit(x_train, y_train, eval_metric='mlogloss',verbose=True,
-        eval_set=[(x_train, y_train), (x_test, y_test)])
+        eval_set=[(x_train, y_train), (x_test, y_test)],
+        early_stopping_rounds=10)
 
 acc = model.score(x_test, y_test)
 
