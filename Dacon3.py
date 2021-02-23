@@ -13,6 +13,9 @@ from torchinfo import summary
 
 from torchvision import transforms
 from torchvision.models import resnet50
+
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
 # os.environ [ 'KMP_DUPLICATE_LIB_OK'] = 'True'
 
 # torch.cuda.empty_cache()
@@ -56,38 +59,50 @@ class MnistDataset(Dataset):
         image = Image.open(
             os.path.join(
                 self.dir, f'{str(image_id).zfill(5)}.png')).convert('RGB')
-        image.resize((128,128))
+        image.resize((256,256))
         # 라벨의 값을 실수로 변경하여 복사하여 타겟에 붙여 넣음
         target = np.array(self.labels.get(image_id)).astype(np.float32)
 
         # 이미지 변환 설정이이 있다면 이미지 변환을 진행함 
         if self.transforms is not None:
+            # image = datagen.flow(image, batch_size=1, shuffle=True)
             image = self.transforms(image)
 
+        
         # x와 y 값을 반환함
         return image, target
 
 
+datagen = ImageDataGenerator(
+    rescale=1./255,
+    featurewise_center=True,
+    featurewise_std_normalization=True,
+    rotation_range=20,
+    
+    width_shift_range=0.2,
+    height_shift_range=0.2,
+    horizontal_flip=True)
 
 transforms_train = transforms.Compose([
     # 0.5 확률로 좌우 뒤집기
     transforms.RandomHorizontalFlip(p=0.5),
     # 0.5 확률로 위아래 뒤집기
     transforms.RandomVerticalFlip(p=0.5),
+    transforms.RandomRotation(degrees=30, center=(64,64)),
     # 0~1 까지 반환하고 컬러 채널이 3차원으로 올라감
     transforms.ToTensor(),
     # 정규화함
     transforms.Normalize(
-        [0.5, 0.5, 0.5],
-        [0.5, 0.5, 0.5]
+        [0.485, 0.456, 0.406],
+        [0.229, 0.224, 0.225]
     )
 ])
 
 transforms_test = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(
-        [0.5, 0.5, 0.5],
-        [0.5, 0.5, 0.5]
+        [0.485, 0.456, 0.406],
+        [0.229, 0.224, 0.225]
     )
 ])
 
@@ -96,7 +111,7 @@ trainset = MnistDataset('data/train', 'data/dirty_mnist_2nd_answer.csv', transfo
 testset = MnistDataset('data/test', 'data/sample_submission.csv', transforms_test)
 
 # 입력 데이터 셋의 배치사이즈를 정함 병렬 작업할 프로세스의 갯수를 정함
-train_loader = DataLoader(trainset, batch_size=64, num_workers=8)
+train_loader = DataLoader(trainset, batch_size=32, num_workers=8)
 test_loader = DataLoader(testset, batch_size=32, num_workers=6)
 
 # 모델 x를 반환하는 클래스
@@ -129,7 +144,7 @@ if __name__ == '__main__':
     criterion = nn.MultiLabelSoftMarginLoss()
 
     # 에포치 10주고 모델을 트레인으로 변환
-    num_epochs = 20
+    num_epochs = 40
     model.train()
 
     # 에포치 만큼 반복
