@@ -5,17 +5,25 @@ import cv2
 import numpy as np
 import pandas as pd
 from PIL import Image
+from tensorflow.python.keras.backend import dtype
 import torch
 import torch.optim as optim
 from torch import nn, Tensor
 from torch.utils.data import Dataset, DataLoader
 from torchinfo import summary
+import torch.nn.functional as F
 
 from torchvision import transforms
-from torchvision.models import resnet50
+from torchvision.models import resnet50, inception_v3
+
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+import tensorflow as tf
+
 # os.environ [ 'KMP_DUPLICATE_LIB_OK'] = 'True'
 
 # torch.cuda.empty_cache()
+def mish(x):
+    return x * tf.math.tanh(tf.math.softplus(x))
 
 class MnistDataset(Dataset):
     def __init__(
@@ -37,8 +45,6 @@ class MnistDataset(Dataset):
             next(reader)
             # reader의 인수 갯수 만큼 반복하여 reader의 각각 인수 하나를 참조하는 row를 만듬
             for row in reader:
-                # 초기화된 row의 두번 째 값을 인덱스를 제외한 값 부터 끝까지 str타입을 int로 변환하고
-                # 리스트 형태로 복사하여 라벨 인덱스 위치에 붙여 넣음
                 self.labels[int(row[0])] = list(map(int, row[1:]))
 
         # 클래스에서 사용하는 변수를 라벨키로 복사하여 붙어넣음
@@ -55,15 +61,17 @@ class MnistDataset(Dataset):
         # 경로에 있는 이미지를 열고 RGB로 바꿔서 image에 담음
         image = Image.open(
             os.path.join(
-                self.dir, f'{str(image_id).zfill(5)}.png')).convert('RGB')
-        image.resize((128,128))
+                self.dir, f'{str(image_id).zfill(5)}.png')).convert("RGB")
+        image.resize((256,256))
+        # ========================================
+        # cv2.
+        # ========================================
+
         # 라벨의 값을 실수로 변경하여 복사하여 타겟에 붙여 넣음
         target = np.array(self.labels.get(image_id)).astype(np.float32)
-
-        # 이미지 변환 설정이이 있다면 이미지 변환을 진행함 
+        # 이미지 변환 설정이 있다면 이미지 변환을 진행함 
         if self.transforms is not None:
             image = self.transforms(image)
-
         # x와 y 값을 반환함
         return image, target
 
@@ -73,41 +81,50 @@ transforms_train = transforms.Compose([
     transforms.RandomHorizontalFlip(p=0.5),
     # 0.5 확률로 위아래 뒤집기
     transforms.RandomVerticalFlip(p=0.5),
+    transforms.RandomRotation(degrees=30, center=(128,128)),
     # 0~1 까지 반환하고 컬러 채널이 3차원으로 올라감
     transforms.ToTensor(),
     # 정규화함
     transforms.Normalize(
-        [0.5, 0.5, 0.5],
-        [0.5, 0.5, 0.5]
+        [0.485, 0.456, 0.406],
+        [0.229, 0.224, 0.225]
     )
 ])
 
 transforms_test = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(
-        [0.5, 0.5, 0.5],
-        [0.5, 0.5, 0.5]
+        [0.485, 0.456, 0.406],
+        [0.229, 0.224, 0.225]
     )
 ])
 
 # 파일의 이미지를 정규화하고 타겟을 각각 셋에 담고 초기화함
-trainset = MnistDataset('../data/Dacon3/dataset/train', '../data/Dacon3/dataset/dirty_mnist_2nd_answer.csv', transforms_train)
-testset = MnistDataset('../data/Dacon3/dataset/test', '../data/Dacon3/dataset/sample_submission.csv', transforms_test)
+# dirty_mnist_2nd_answer
+trainset = MnistDataset('data/dirty_mnist_2nd_noise_clean/s', 'data/dirty_mnist_2nd_answer.csv', transforms_train)
+testset = MnistDataset('data/test_dirty_mnist_2nd_noise_clean', 'data/sample_submission.csv', transforms_test)
 
-
-
-# img2 = np.where((img<=150)&(img!=0) ,0.,img)
-# plt.title('img2 Index: %i, Digit: %s, Letter: %s'%(idx, digit, letter))
-# plt.imshow(img2)
-# plt.show()
-
+# ==========================================
+# img = np.array(trainset[0][0][0])
+# print('??',len(trainset))
+# # print('??',trainset[1].shape)
 # import matplotlib.pyplot as plt
-# plt.imshow(img2)
+
+# plt.figure(figsize=(10,6))
+# plt.subplot(1,2,1)
+
+# plt.imshow(img)
 # plt.show()
+# # ==========================================
 
 # 입력 데이터 셋의 배치사이즈를 정함 병렬 작업할 프로세스의 갯수를 정함
-train_loader = DataLoader(trainset, batch_size=1, num_workers=6)
-test_loader = DataLoader(testset, batch_size=1, num_workers=4)
+
+train_loader = DataLoader(trainset, batch_size=16, num_workers=8, shuffle=True)
+test_loader = DataLoader(testset, batch_size=16, num_workers=6)
+def set_parameter_requires_grad(model, feature_extracting):
+    if feature_extracting:
+        for param in model.parameters():
+            param.requires_grad = False
 
 # 모델 x를 반환하는 클래스
 class MnistModel(nn.Module):
@@ -115,13 +132,21 @@ class MnistModel(nn.Module):
         # 모델의 속성을 따옴
         super().__init__()
         # resnet50 모델으 불러옴
+        self.conv2d = nn.Conv2d(3, 3, 8, stride=1)
         self.resnet = resnet50(pretrained=True)
+        self.inception = inception_v3(pretrained=True, progress=True)
         # 마지막 모델은 Linear로 1000을 받아서 26으로 출력함
-        self.classifier = nn.Linear(1000, 26)
-
+        self.classifier = nn.Linear(1000, 26, bias=True)
+        self.Linear = nn.Linear(in_features=768, out_features=26, bias=True)
     def forward(self, x):
+        # x = self.conv2d(x)
         x = self.resnet(x)
+        # x = self.inception(x)
+        # set_parameter_requires_grad(x, True)
+        # x = self.Linear(x)
+        # x = mish(x)
         x = self.classifier(x)
+        # x = torch.sigmoid(x)
 
         return x
 
@@ -129,12 +154,13 @@ class MnistModel(nn.Module):
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = MnistModel().to(device)
 
-print(summary(model, input_size=(1, 3, 256, 256), verbose=0))
-
+# print(summary(model, input_size=(1, 3, 256, 256), verbose=0))
+summary(model, input_size=(1, 3, 256, 256), verbose=0)
 # 실행 하는 곳이 메인인 경우
 if __name__ == '__main__':
     
     # 옵티마이저와 멀티라벨소프트 마진 로스를 사용함
+    # optimizer = optim.Adam(model.parameters(), lr=1e-3)
     optimizer = optim.Adam(model.parameters(), lr=1e-3)
     criterion = nn.MultiLabelSoftMarginLoss()
 
@@ -145,6 +171,7 @@ if __name__ == '__main__':
     # 에포치 만큼 반복
     for epoch in range(num_epochs):
             # 배치 사이즈 만큼 스탭을 진행함
+
             for i, (images, targets) in enumerate(train_loader):
 
                 # 미분 값 초기화
@@ -162,16 +189,16 @@ if __name__ == '__main__':
                 # 매개변수 갱신함
                 optimizer.step()
             
-                # 10에포치 마다 로스와 액큐러시를 출력함
+                # 10배치 마다 로스와 액큐러시를 출력함
                 if (i+1) % 10 == 0:
                     outputs = outputs > 0.5
                     acc = (outputs == targets).float().mean()
                     print(f'{epoch}: {loss.item():.5f}, {acc.item():.5f}')
 
 if __name__ == '__main__':
-
+    
     # 평가 폴더를 열음
-    submit = pd.read_csv('../data/Dacon3/dataset/sample_submission.csv')
+    submit = pd.read_csv('data/sample_submission.csv')
 
     # 이벨류 모드로 전환
     model.eval()
@@ -185,13 +212,13 @@ if __name__ == '__main__':
         images = images.to(device)
         targets = targets.to(device)
         outputs = model(images)
-        outputs = outputs > 0.5
+        outputs = outputs > 0.7
         batch_index = i * batch_size
         submit.iloc[batch_index:batch_index+batch_size, 1:] = \
             outputs.long().squeeze(0).detach().cpu().numpy()
 
     # 저장함
-    submit.to_csv('../data/Dacon3/dataset/submit.csv', index=False)
+    submit.to_csv('submit_2.csv', index=False)
 
     del images
     del targets
