@@ -14,8 +14,8 @@ dataset = load_diabetes()
 x_data = dataset.data
 y_data = dataset.target.reshape(-1,1)
 
-from sklearn.preprocessing import StandardScaler
-scaler = StandardScaler()
+from sklearn.preprocessing import StandardScaler, RobustScaler
+scaler = RobustScaler()
 scaler.fit(x_data)
 x_data = scaler.transform(x_data)
 

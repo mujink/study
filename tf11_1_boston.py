@@ -14,8 +14,8 @@ dataset = load_boston()
 x_data = dataset.data
 y_data = dataset.target.reshape(-1,1)
 
-from sklearn.preprocessing import MinMaxScaler
-scaler = MinMaxScaler()
+from sklearn.preprocessing import MinMaxScaler, RobustScaler, StandardScaler
+scaler = RobustScaler()
 scaler.fit(x_data)
 x_data = scaler.transform(x_data)
 
