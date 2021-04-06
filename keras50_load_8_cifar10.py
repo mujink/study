@@ -16,7 +16,6 @@ one = OneHotEncoder()
 y_train = y_train.reshape(-1,1)                 
 y_test = y_test.reshape(-1,1)                               
 one.fit(y_train)                          
-one.fit(y_test)                                                   
 y_train = one.transform(y_train).toarray()
 y_test = one.transform(y_test).toarray()
 
